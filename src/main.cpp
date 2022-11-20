@@ -1,0 +1,199 @@
+#include <Rcpp.h>
+#define EIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS
+#define EIGEN_DONT_PARALLELIZE
+#include <RcppEigen.h>
+#include <math.h>
+#include "utils.h"
+#include "variance.h"
+#include "binarynodeClass.h"
+
+// [[Rcpp::depends(RcppEigen)]]
+
+//' @export
+// [[Rcpp::export]]
+Rcpp::List ncl(
+        Eigen::MatrixXd &DATA,
+        Eigen::VectorXd &THETA,
+        std::vector<bool> &CONSTRAINTS,
+        const bool VERBOSEFLAG = false
+){
+    // Identify dimensions
+    const unsigned int n = DATA.rows();
+    const unsigned int d = THETA.size();
+    const unsigned int p = (- 1 + sqrt(1 + 8*d))/2;
+
+    binarynodeClass Node;
+    double cl = 0;
+    Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
+    for(unsigned int i = 0; i < n; i++){
+
+        Eigen::VectorXd data_i = DATA.row(i);
+        for(unsigned int node = 0; node < p; node++){
+
+            Node.setup_(data_i, THETA, CONSTRAINTS, p, node);
+            cl -= Node.ll_();
+            gradient -= Node.gradient_();
+
+            // cl += logp_ising_node(data.row(i), theta, node, verboseFLAG);
+            // gradient += gradient_ising_node_constr(data.row(i), theta, Q, node, verboseFLAG);
+        }
+    }
+
+    Rcpp::List output =
+        Rcpp::List::create(
+            Rcpp::Named("nll") = cl,
+            Rcpp::Named("ngradient") = gradient
+        );
+
+    return output;
+
+}
+
+
+//' @export
+// [[Rcpp::export]]
+Rcpp::List isingGraph(
+        const Eigen::MatrixXd &DATA,
+        const Eigen::VectorXd &THETA_INIT,
+        const std::vector<bool> &CONSTRAINTS,
+        const unsigned int MAXT,
+        const unsigned int BURN,
+        const double STEPSIZE,
+        const double NU,
+        const int METHODFLAG,
+        const bool VERBOSEFLAG = false
+
+){
+    // Set up clock monitor to export to R session trough RcppClock
+    // Rcpp::Clock clock;
+    // clock.tick("main");
+
+    // Identify dimensions
+    const unsigned int n = DATA.rows();
+    const unsigned int d = THETA_INIT.size();
+    const unsigned int p = (- 1 + sqrt(1 + 8*d))/2;
+    const unsigned int kk= p;
+
+    // scaling constant according to sampling_scheme
+    // Compute scaling constant
+    double scale;
+    switch(METHODFLAG){
+    case 0:
+        scale = 1/static_cast<double>(n) ;
+        break;
+    case 1:
+        scale = 1/static_cast<double>(NU);
+        break;
+    case 2:
+        scale = 1/static_cast<double>(NU);
+        break;
+    }
+    Rcpp::Rcout << " Final scale = " << scale<< "\n";
+
+    // Initialize storage for iterations quantities
+    Eigen::MatrixXd path_theta    = Eigen::MatrixXd::Zero(MAXT + 1, d); path_theta.row(0)    = THETA_INIT;
+    Eigen::MatrixXd path_av_theta = Eigen::MatrixXd::Zero(MAXT + 1, d); path_av_theta.row(0) = THETA_INIT;
+    Eigen::MatrixXd path_grad     = Eigen::MatrixXd::Zero(MAXT,     d);
+
+    ///////////////////////
+    /* OPTIMISATION LOOP */
+    ///////////////////////
+
+    binarynodeClass Node;
+    Eigen::VectorXd theta_t = THETA_INIT;
+    for(unsigned int t = 1; t <= MAXT; t++){
+        // check user interruption
+        Rcpp::checkUserInterrupt();
+        Rcpp::Rcout << "\r Iter:" << t << " ";
+
+        /////////////////////
+        // SAMPLING SCHEME //
+        /////////////////////
+        Rcpp::NumericMatrix sampling_weights(n,kk);
+        std::fill(sampling_weights.begin(), sampling_weights.end(), 0) ;
+
+        double prob;
+        switch(METHODFLAG){
+        case 0:
+            std::fill( sampling_weights.begin(), sampling_weights.end(), 1);
+            break;
+        case 1:
+            prob = 1/static_cast<double>(n);
+            sampling_weights = rmultinom_wrapper(prob, n, NU, kk);
+            break;
+        case 2:
+            prob = static_cast<double>(NU)/static_cast<double>(n);
+            for(unsigned int i = 0; i < n; i++){
+                for(unsigned int k = 0; k < kk; k++){
+                    if(R::runif(0,1) < prob ) sampling_weights(i, k) = 1;
+                }
+            }
+            break;
+        }
+
+
+
+
+        //initialize iteration gradient
+        Eigen::VectorXd ngradient_t = Eigen::VectorXd::Zero(d);
+
+        ///////////////////////////
+        /* GRADIENT COMPUTATION  */
+        ///////////////////////////
+        // looping over units
+        // clock.tick("stochastic_gradient");
+        for(unsigned int i = 0; i < n; i++){
+            Eigen::VectorXd data_i = DATA.row(i);
+
+            // looping over nodes
+            for(unsigned int node = 0; node < kk; node++){
+                unsigned int weight = sampling_weights(i, node);
+                if(weight != 0){
+
+                    Node.setup_(data_i, theta_t, CONSTRAINTS, p, node);
+                    ngradient_t -= weight * Node.gradient_();
+                }
+            }
+
+        }
+        ngradient_t *= scale;
+
+        ///////////////////////////
+        /*    PARAMETERS UPDATE  */
+        ///////////////////////////
+        // clock.tick("par_update");
+        double stepsize_t = STEPSIZE * pow(t, -.501);
+        theta_t -= stepsize_t * ngradient_t;
+        // clock.tock("par_update");
+
+
+        /////////////////////////////////
+        /* STORE ITERATION QUANTITIES  */
+        /////////////////////////////////
+        path_theta.row(t ) = theta_t;
+        path_grad.row(t-1) = ngradient_t;
+
+        // averaging after burnsize
+        if(t <= BURN){
+            path_av_theta.row(t) = path_theta.row(t);
+        }else{
+            path_av_theta.row(t) = ( (t - BURN - 1) * path_av_theta.row(t - 1) + path_theta.row(t) ) / (t - BURN);
+        }
+    }
+
+    // clock.tock("main");
+    // clock.stop("clock");
+
+    Rcpp::List output = Rcpp::List::create(
+        Rcpp::Named("path_theta") = path_theta,
+        Rcpp::Named("path_av_theta") = path_av_theta,
+        Rcpp::Named("path_grad") = path_grad,
+        Rcpp::Named("scale") = scale,
+        Rcpp::Named("n") = n,
+        // Rcpp::Named("weights") = weights,
+        Rcpp::Named("methodflag") = METHODFLAG
+    );
+
+    return output;
+
+}
