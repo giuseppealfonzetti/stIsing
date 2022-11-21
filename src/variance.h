@@ -112,7 +112,7 @@ Rcpp::List sampleVar(
     Rcpp::List se;
 
     // Compute inverse of negative hessian
-    Eigen::MatrixXd inv_hmat = sampleH(THETA, DATA, CONSTRAINTS, PRINTFLAG, true);
+    Eigen::MatrixXd inv_hmat = sampleH(THETA, DATA, CONSTRAINTS, true, PRINTFLAG);
 
     if(METHOD == 0){
         jmat = sampleJ(THETA, DATA, CONSTRAINTS, PRINTFLAG);
