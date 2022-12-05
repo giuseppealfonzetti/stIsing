@@ -9,7 +9,7 @@ ising_graph_gradient <- function(par){
 ##### setup parameters ######
 p <- 20
 d <- p + p*(p-1)/2
-n <- 2000
+n <- 4000
 
 parNodes <- rep(c(-1,1), p/2)
 parEdgesMat <- matrix(0,p, p)
@@ -40,7 +40,7 @@ graph_mat <- ising_from_theta_to_emat(true_theta, p)
 graph_mat <- graph_mat + t(graph_mat)
 thr_vec <- true_theta[1:p]
 
-seed <- 123
+seed <- 1
 set.seed(seed)
 data <- IsingSampler::IsingSampler(n, graph_mat, thr_vec, 1, method = "direct")
 ##### optimisation #######
@@ -74,7 +74,20 @@ theta_init <- rep(0, length(true_theta))
 # mean((Opt$path_av_theta[nrow(Opt$path_av_theta),]-true_theta)^2)
 # mean((opt$par-true_theta)^2)
 # mean((rep(0, length(true_theta))-true_theta)^2)
-
+cpp_ctrl <- list(
+    MAXT = 5000,
+    BURN = 1000,
+    NU = 1,
+    SEED = 1
+)
+stepsize_tuning(
+    DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
+    METHOD = 'SGD',
+    CPP_CONTROL = cpp_ctrl,
+    INIT = theta_init,
+    STEPSIZE_GRID = seq(0,5,.5),
+    VERBOSEFLAG = 0
+)
 
 fit_uc <- fit_isingGraph(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
@@ -85,11 +98,12 @@ fit_uc <- fit_isingGraph(
     ITERATIONS_SUBSET = NULL,
     VERBOSEFLAG = 0
 )
+
 cpp_ctrl <- list(
-    MAXT = 10000,
+    MAXT = 20000,
     BURN = 1000,
-    STEPSIZE = 2,
-    NU = 8,
+    STEPSIZE = 1.5,
+    NU = 1,
     SEED = 1
 )
 fit_sgd <- fit_isingGraph(
@@ -101,6 +115,15 @@ fit_sgd <- fit_isingGraph(
     ITERATIONS_SUBSET = NULL,
     VERBOSEFLAG = 0
 )
+
+cpp_ctrl <- list(
+    MAXT = 20000,
+    BURN = 1000,
+    STEPSIZE = 1.5,
+    NU = 1,
+    SEED = 1
+)
+
 fit_scsd <- fit_isingGraph(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
     METHOD = 'SCSD',
@@ -131,3 +154,12 @@ gg <- get_tidy_path(fit_sgd, 'path_av_theta') %>%
     geom_hline(yintercept = log(mean((fit_uc$theta-true_theta)^2)), linetype = 'dashed')+
     theme_minimal()
 plotly::ggplotly(gg)
+
+# eta <- 5
+# ncl(as.matrix(data[1,]), theta_init, Q, VERBOSEFLAG = F)$nll
+# gr <- ncl(as.matrix(data[1,]), theta_init, Q, VERBOSEFLAG = F)$ngr
+# ncl(as.matrix(data[1,]), theta_init-eta*gr, Q, VERBOSEFLAG = F)$nll
+
+
+
+

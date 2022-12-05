@@ -75,7 +75,7 @@ fit_isingGraph <- function(
 
         message(paste0('2. Optimising with ', METHOD, '...'))
 
-        # Check stochastic controlparameters
+        # Check stochastic control parameters
         cpp_ctrl <- check_SCSD_args(CPP_CONTROL, N = n)
 
         # Check iterations selected
@@ -100,6 +100,8 @@ fit_isingGraph <- function(
         fit$path_theta    <- fit$path_theta[out$iterations_subset + 1,]
         fit$path_av_theta <- fit$path_av_theta[out$iterations_subset + 1,]
         fit$path_grad     <- fit$path_grad[out$iterations_subset,]
+        # fit$path_ncl      <- fit$path_ncl[out$iterations_subset]
+
 
         fit$methodflag <- NULL
 

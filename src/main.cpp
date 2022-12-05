@@ -33,9 +33,6 @@ Rcpp::List ncl(
             Node.setup_(data_i, THETA, CONSTRAINTS, p, node);
             cl -= Node.ll_();
             gradient -= Node.gradient_();
-
-            // cl += logp_ising_node(data.row(i), theta, node, verboseFLAG);
-            // gradient += gradient_ising_node_constr(data.row(i), theta, Q, node, verboseFLAG);
         }
     }
 
@@ -88,12 +85,13 @@ Rcpp::List isingGraph(
         scale = 1/static_cast<double>(NU);
         break;
     }
-    Rcpp::Rcout << " Final scale = " << scale<< "\n";
+    // Rcpp::Rcout << " Final scale = " << scale<< "\n";
 
     // Initialize storage for iterations quantities
     Eigen::MatrixXd path_theta    = Eigen::MatrixXd::Zero(MAXT + 1, d); path_theta.row(0)    = THETA_INIT;
     Eigen::MatrixXd path_av_theta = Eigen::MatrixXd::Zero(MAXT + 1, d); path_av_theta.row(0) = THETA_INIT;
     Eigen::MatrixXd path_grad     = Eigen::MatrixXd::Zero(MAXT,     d);
+    // Eigen::VectorXd path_ncl      = Eigen::VectorXd::Zero(MAXT);
 
     ///////////////////////
     /* OPTIMISATION LOOP */
@@ -134,8 +132,9 @@ Rcpp::List isingGraph(
 
 
 
-        //initialize iteration gradient
+        //initialize iteration quantities
         Eigen::VectorXd ngradient_t = Eigen::VectorXd::Zero(d);
+        double ncl = 0;
 
         ///////////////////////////
         /* GRADIENT COMPUTATION  */
@@ -152,10 +151,14 @@ Rcpp::List isingGraph(
 
                     Node.setup_(data_i, theta_t, CONSTRAINTS, p, node);
                     ngradient_t -= weight * Node.gradient_();
+                    // ncl -= Node.ll_();
+
                 }
             }
 
         }
+
+        ncl *= scale;
         ngradient_t *= scale;
 
         ///////////////////////////
@@ -172,6 +175,7 @@ Rcpp::List isingGraph(
         /////////////////////////////////
         path_theta.row(t ) = theta_t;
         path_grad.row(t-1) = ngradient_t;
+        // path_ncl(t-1)      = ncl;
 
         // averaging after burnsize
         if(t <= BURN){
@@ -188,6 +192,7 @@ Rcpp::List isingGraph(
         Rcpp::Named("path_theta") = path_theta,
         Rcpp::Named("path_av_theta") = path_av_theta,
         Rcpp::Named("path_grad") = path_grad,
+        // Rcpp::Named("path_ncl") = path_ncl,
         Rcpp::Named("scale") = scale,
         Rcpp::Named("n") = n,
         // Rcpp::Named("weights") = weights,
