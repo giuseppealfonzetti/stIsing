@@ -2,12 +2,13 @@
 #define EIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS
 #define EIGEN_DONT_PARALLELIZE
 #include <RcppEigen.h>
+#include <RcppClock.h>
 #include <math.h>
 #include "utils.h"
 #include "variance.h"
 #include "binarynodeClass.h"
 
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppEigen, RcppClock)]]
 
 //' @export
 // [[Rcpp::export]]
@@ -62,8 +63,8 @@ Rcpp::List isingGraph(
 
 ){
     // Set up clock monitor to export to R session trough RcppClock
-    // Rcpp::Clock clock;
-    // clock.tick("main");
+    Rcpp::Clock clock;
+    clock.tick("main");
 
     // Identify dimensions
     const unsigned int n = DATA.rows();
@@ -107,6 +108,7 @@ Rcpp::List isingGraph(
         /////////////////////
         // SAMPLING SCHEME //
         /////////////////////
+        clock.tick("sampling_step");
         Rcpp::NumericMatrix sampling_weights(n,kk);
         std::fill(sampling_weights.begin(), sampling_weights.end(), 0) ;
 
@@ -128,9 +130,7 @@ Rcpp::List isingGraph(
             }
             break;
         }
-
-
-
+        clock.tock("sampling_step");
 
         //initialize iteration quantities
         Eigen::VectorXd ngradient_t = Eigen::VectorXd::Zero(d);
@@ -140,7 +140,7 @@ Rcpp::List isingGraph(
         /* GRADIENT COMPUTATION  */
         ///////////////////////////
         // looping over units
-        // clock.tick("stochastic_gradient");
+        clock.tick("stochastic_gradient");
         for(unsigned int i = 0; i < n; i++){
             Eigen::VectorXd data_i = DATA.row(i);
 
@@ -157,6 +157,7 @@ Rcpp::List isingGraph(
             }
 
         }
+        clock.tock("stochastic_gradient");
 
         ncl *= scale;
         ngradient_t *= scale;
@@ -164,10 +165,10 @@ Rcpp::List isingGraph(
         ///////////////////////////
         /*    PARAMETERS UPDATE  */
         ///////////////////////////
-        // clock.tick("par_update");
+        clock.tick("update");
         double stepsize_t = STEPSIZE * pow(t, -.501);
         theta_t -= stepsize_t * ngradient_t;
-        // clock.tock("par_update");
+        clock.tock("update");
 
 
         /////////////////////////////////
@@ -185,8 +186,8 @@ Rcpp::List isingGraph(
         }
     }
 
-    // clock.tock("main");
-    // clock.stop("clock");
+    clock.tock("main");
+    clock.stop("clock");
 
     Rcpp::List output = Rcpp::List::create(
         Rcpp::Named("path_theta") = path_theta,

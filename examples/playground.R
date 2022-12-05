@@ -115,7 +115,8 @@ fit_sgd <- fit_isingGraph(
     ITERATIONS_SUBSET = NULL,
     VERBOSEFLAG = 0
 )
-
+fit_sgd$clock
+summary(clock, units = 's')
 cpp_ctrl <- list(
     MAXT = 20000,
     BURN = 1000,

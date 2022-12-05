@@ -110,8 +110,11 @@ fit_isingGraph <- function(
         out$control <- cpp_ctrl
         out$fit <- fit
         out$theta <- fit$path_av_theta[nrow(fit$path_av_theta),]
+        if('RcppClock'%in% (.packages())) out$clock <- summary(clock, units = 's')
+
         end_time <- Sys.time()
         out$time <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
+
         message('\n3. Done! (', round(out$time,2),' secs)')
         return(out)
 
