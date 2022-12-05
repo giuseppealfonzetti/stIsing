@@ -40,7 +40,7 @@ graph_mat <- ising_from_theta_to_emat(true_theta, p)
 graph_mat <- graph_mat + t(graph_mat)
 thr_vec <- true_theta[1:p]
 
-seed <- 1
+seed <- 2
 set.seed(seed)
 data <- IsingSampler::IsingSampler(n, graph_mat, thr_vec, 1, method = "direct")
 ##### optimisation #######
@@ -82,7 +82,7 @@ cpp_ctrl <- list(
 )
 stepsize_tuning(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
-    METHOD = 'SGD',
+    METHOD = 'OSGD',
     CPP_CONTROL = cpp_ctrl,
     INIT = theta_init,
     STEPSIZE_GRID = seq(0,5,.5),
@@ -102,13 +102,13 @@ fit_uc <- fit_isingGraph(
 cpp_ctrl <- list(
     MAXT = 20000,
     BURN = 1000,
-    STEPSIZE = 1.5,
+    STEPSIZE = 2,
     NU = 1,
     SEED = 1
 )
 fit_sgd <- fit_isingGraph(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
-    METHOD = 'SGD',
+    METHOD = 'OSGD',
     CPP_CONTROL = cpp_ctrl,
     #UCMINF_CONTROL = list(),
     INIT = theta_init,
@@ -120,14 +120,14 @@ summary(clock, units = 's')
 cpp_ctrl <- list(
     MAXT = 20000,
     BURN = 1000,
-    STEPSIZE = 1.5,
+    STEPSIZE = 2,
     NU = 1,
     SEED = 1
 )
 
 fit_scsd <- fit_isingGraph(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
-    METHOD = 'SCSD',
+    METHOD = 'CSGD_bernoulli',
     CPP_CONTROL = cpp_ctrl,
     #UCMINF_CONTROL = list(),
     INIT = theta_init,
@@ -142,17 +142,17 @@ mean((theta_init-true_theta)^2)
 
 
 gg <- get_tidy_path(fit_sgd, 'path_av_theta') %>%
-    mutate( mod = 'SGD') %>%
+    mutate( mod = 'OSGD') %>%
     bind_rows(
         get_tidy_path(fit_scsd, 'path_av_theta') %>%
-            mutate( mod = 'SCSD')
+            mutate( mod = 'CSGD_bernoulli')
     ) %>%
     mutate(
         mse = map_dbl(path_av_theta, ~mean((.x-true_theta)^2))
     ) %>%
-    ggplot( aes(x = iter, y = log(mse), col = mod))+
+    ggplot( aes(x = iter, y = (mse), col = mod))+
     geom_line()+
-    geom_hline(yintercept = log(mean((fit_uc$theta-true_theta)^2)), linetype = 'dashed')+
+    geom_hline(yintercept = (mean((fit_uc$theta-true_theta)^2)), linetype = 'dashed')+
     theme_minimal()
 plotly::ggplotly(gg)
 

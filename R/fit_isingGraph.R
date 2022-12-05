@@ -36,7 +36,7 @@ fit_isingGraph <- function(
     }
 
     # Check if method entry is correct
-    if(!(METHOD %in% c('ucminf','GD', 'SGD', 'SCSD'))) stop('Method not available.')
+    if(!(METHOD %in% c('ucminf','GD', 'OSGD', 'CSGD_bernoulli'))) stop('Method not available.')
     out$method <- METHOD
 
     # Numerical optimisation
@@ -71,7 +71,7 @@ fit_isingGraph <- function(
     }
 
     # Stochastic approximation of numerical optimiser
-    if(METHOD == 'SGD' | METHOD == 'SCSD' ){
+    if(METHOD == 'OSGD' | METHOD == 'CSGD_bernoulli' ){
 
         message(paste0('2. Optimising with ', METHOD, '...'))
 
@@ -93,7 +93,7 @@ fit_isingGraph <- function(
 
         args$SEED <- NULL
 
-        args$METHODFLAG <- dplyr::if_else(METHOD == 'SGD', 1, 2)
+        args$METHODFLAG <- dplyr::if_else(METHOD == 'OSGD', 1, 2)
 
 
         fit <- do.call(isingGraph, args)

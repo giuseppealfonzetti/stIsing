@@ -28,7 +28,7 @@ stepsize_tuning <- function(
     }
 
     # Check if method entry is correct
-    if(!(METHOD %in% c('SGD', 'SCSD'))) stop('Method not available.')
+    if(!(METHOD %in% c('OSGD', 'CSGD_bernoulli'))) stop('Method not available.')
     out$method <- METHOD
 
     # Check stochastic control parameters
@@ -44,7 +44,7 @@ stepsize_tuning <- function(
 
     args$SEED <- NULL
 
-    args$METHODFLAG <- dplyr::if_else(METHOD == 'SGD', 1, 2)
+    args$METHODFLAG <- dplyr::if_else(METHOD == 'OSGD', 1, 2)
     Rwr_ncl <- function(par){ ncl(DATA_LIST$DATA, par, DATA_LIST$CONSTRAINTS)$nll }
 
     fun_grid <- sapply(STEPSIZE_GRID, function(x){
