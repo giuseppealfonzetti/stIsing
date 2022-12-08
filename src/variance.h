@@ -177,8 +177,8 @@ Rcpp::List sampleVar(
     if(METHOD == 3){
         double st_scale = NU*RANGE;
         jmat = sampleJ(THETA, DATA, CONSTRAINTS, PRINTFLAG);
-        double alpha_1 = static_cast<double>(n-1)/static_cast<double>(n) + static_cast<double>(n-1)/static_cast<double>(n*kk-1);
-        double alpha_2 = -static_cast<double>(n-1)/static_cast<double>(n*kk-1);
+        double alpha_1 = static_cast<double>(n-1)/static_cast<double>(n) + (static_cast<double>(n-1)/static_cast<double>(n*kk-1))/(static_cast<double>(n));
+        double alpha_2 = -(static_cast<double>(n-1)/static_cast<double>(n*kk-1))/(static_cast<double>(n));
 
         if(TOTFLAG) {
 
