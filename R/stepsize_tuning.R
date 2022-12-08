@@ -5,7 +5,8 @@ stepsize_tuning <- function(
         CPP_CONTROL = list(),
         INIT = NULL,
         STEPSIZE_GRID = NULL,
-        VERBOSEFLAG = 0
+        VERBOSEFLAG = 0,
+        NCL_SAMPLE_SIZE = 1000
 ){
 
     out <- list()
@@ -28,7 +29,7 @@ stepsize_tuning <- function(
     }
 
     # Check if method entry is correct
-    if(!(METHOD %in% c('OSGD', 'CSGD_bernoulli'))) stop('Method not available.')
+    if(!(METHOD %in% c('ucminf','GD', 'OSGD', 'CSGD_bernoulli', 'CSGD_hyper'))) stop('Method not available.')
     out$method <- METHOD
 
     # Check stochastic control parameters
@@ -42,12 +43,13 @@ stepsize_tuning <- function(
     # Collect and rearrange arguments to pass to cpp function
     args <- append(list( 'THETA_INIT' = out$theta_init), c( DATA_LIST, cpp_ctrl) )
 
-    args$SEED <- NULL
+    #args$SEED <- NULL
 
-    args$METHODFLAG <- dplyr::if_else(METHOD == 'OSGD', 1, 2)
-    Rwr_ncl <- function(par){ ncl(DATA_LIST$DATA, par, DATA_LIST$CONSTRAINTS)$nll }
+    sub_data <- DATA_LIST$DATA[sample(1:nrow(DATA_LIST$DATA), NCL_SAMPLE_SIZE),]
+    if(METHOD == 'OSGD'){args$METHODFLAG <- 1} else if(METHOD == 'CSGD_bernoulli'){args$METHODFLAG <- 2}else if(METHOD == 'CSGD_hyper'){args$METHODFLAG <- 3}
+    Rwr_ncl <- function(par){ ncl(sub_data, par, DATA_LIST$CONSTRAINTS)$nll }
 
-    fun_grid <- sapply(STEPSIZE_GRID, function(x){
+    fun_grid <- pbapply::pbsapply(STEPSIZE_GRID, function(x){
         args$STEPSIZE <- x
         fit <- do.call(isingGraph, args)
         # fun <- mean(fit$path_ncl[CPP_CONTROL$BURN:length(fit$path_ncl)])

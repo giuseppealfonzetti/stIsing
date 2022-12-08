@@ -7,7 +7,7 @@ ising_graph_gradient <- function(par){
     ncl(as.matrix(data), par, Q, VERBOSEFLAG = F)$ngradient
 }
 ##### setup parameters ######
-p <- 20
+p <- 10
 d <- p + p*(p-1)/2
 n <- 4000
 
@@ -40,7 +40,7 @@ graph_mat <- ising_from_theta_to_emat(true_theta, p)
 graph_mat <- graph_mat + t(graph_mat)
 thr_vec <- true_theta[1:p]
 
-seed <- 2
+seed <- 1
 set.seed(seed)
 data <- IsingSampler::IsingSampler(n, graph_mat, thr_vec, 1, method = "direct")
 ##### optimisation #######
@@ -78,14 +78,14 @@ cpp_ctrl <- list(
     MAXT = 5000,
     BURN = 1000,
     NU = 1,
-    SEED = 1
+    SEED = 5
 )
 stepsize_tuning(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
     METHOD = 'OSGD',
     CPP_CONTROL = cpp_ctrl,
     INIT = theta_init,
-    STEPSIZE_GRID = seq(0,5,.5),
+    STEPSIZE_GRID = seq(0.5,5,.5),
     VERBOSEFLAG = 0
 )
 
@@ -100,9 +100,9 @@ fit_uc <- fit_isingGraph(
 )
 
 cpp_ctrl <- list(
-    MAXT = 20000,
-    BURN = 1000,
-    STEPSIZE = 2,
+    MAXT = 10000,
+    BURN = 500,
+    STEPSIZE = 1.5,
     NU = 1,
     SEED = 1
 )
@@ -115,12 +115,20 @@ fit_sgd <- fit_isingGraph(
     ITERATIONS_SUBSET = NULL,
     VERBOSEFLAG = 0
 )
-fit_sgd$clock
-summary(clock, units = 's')
+#fit_sgd$fit$sublik_pool
+# path <- fit_sgd$fit$path_av_theta[(nrow(fit_sgd$fit$path_av_theta)-1000):nrow(fit_sgd$fit$path_av_theta),]
+# nll_vec <- map_dbl(
+#     as.list(data.frame(t(path))),
+#     ~ ncl(as.matrix(data), .x, Q, VERBOSEFLAG = F)$nll
+# )
+# mean(nll_vec)
+
+
+
 cpp_ctrl <- list(
-    MAXT = 20000,
-    BURN = 1000,
-    STEPSIZE = 2,
+    MAXT = 10000,
+    BURN = 500,
+    STEPSIZE = 1.5,
     NU = 1,
     SEED = 1
 )
@@ -134,10 +142,25 @@ fit_scsd <- fit_isingGraph(
     ITERATIONS_SUBSET = NULL,
     VERBOSEFLAG = 0
 )
+
+fit_hyper <- fit_isingGraph(
+    DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
+    METHOD = 'CSGD_hyper',
+    CPP_CONTROL = cpp_ctrl,
+    #UCMINF_CONTROL = list(),
+    INIT = theta_init,
+    ITERATIONS_SUBSET = NULL,
+    VERBOSEFLAG = 0
+)
+# fit_hyper$theta
+# fit_scsd$theta
+#which(fit_hyper$fit$sampling_weights ==1)
 #fit$theta
 mean((fit_uc$theta-true_theta)^2)
 mean((fit_sgd$theta-true_theta)^2)
 mean((fit_scsd$theta-true_theta)^2)
+mean((fit_hyper$theta-true_theta)^2)
+
 mean((theta_init-true_theta)^2)
 
 
@@ -146,6 +169,10 @@ gg <- get_tidy_path(fit_sgd, 'path_av_theta') %>%
     bind_rows(
         get_tidy_path(fit_scsd, 'path_av_theta') %>%
             mutate( mod = 'CSGD_bernoulli')
+    ) %>%
+    bind_rows(
+        get_tidy_path(fit_hyper, 'path_av_theta') %>%
+            mutate( mod = 'CSGD_hyper')
     ) %>%
     mutate(
         mse = map_dbl(path_av_theta, ~mean((.x-true_theta)^2))
@@ -156,11 +183,15 @@ gg <- get_tidy_path(fit_sgd, 'path_av_theta') %>%
     theme_minimal()
 plotly::ggplotly(gg)
 
+fit_uc$time; fit_sgd$time; fit_scsd$time; fit_hyper$time
+fit_sgd$clock
+fit_scsd$clock
+fit_hyper$clock
 # eta <- 5
 # ncl(as.matrix(data[1,]), theta_init, Q, VERBOSEFLAG = F)$nll
 # gr <- ncl(as.matrix(data[1,]), theta_init, Q, VERBOSEFLAG = F)$ngr
 # ncl(as.matrix(data[1,]), theta_init-eta*gr, Q, VERBOSEFLAG = F)$nll
 
-
-
-
+# mat <- matrix(rep(c(1,2,3), 5), 5,3, byrow = T)
+# purrr::transpose(.l = mat)
+# as.list(data.frame(t(mat)))

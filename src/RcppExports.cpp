@@ -26,8 +26,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // isingGraph
-Rcpp::List isingGraph(const Eigen::MatrixXd& DATA, const Eigen::VectorXd& THETA_INIT, const std::vector<bool>& CONSTRAINTS, const unsigned int MAXT, const unsigned int BURN, const double STEPSIZE, const double NU, const int METHODFLAG, const bool VERBOSEFLAG);
-RcppExport SEXP _stIsing_isingGraph(SEXP DATASEXP, SEXP THETA_INITSEXP, SEXP CONSTRAINTSSEXP, SEXP MAXTSEXP, SEXP BURNSEXP, SEXP STEPSIZESEXP, SEXP NUSEXP, SEXP METHODFLAGSEXP, SEXP VERBOSEFLAGSEXP) {
+Rcpp::List isingGraph(const Eigen::MatrixXd& DATA, const Eigen::VectorXd& THETA_INIT, const std::vector<bool>& CONSTRAINTS, const unsigned int MAXT, const unsigned int BURN, const double STEPSIZE, const double NU, const int METHODFLAG, const unsigned int SEED, const bool VERBOSEFLAG);
+RcppExport SEXP _stIsing_isingGraph(SEXP DATASEXP, SEXP THETA_INITSEXP, SEXP CONSTRAINTSSEXP, SEXP MAXTSEXP, SEXP BURNSEXP, SEXP STEPSIZESEXP, SEXP NUSEXP, SEXP METHODFLAGSEXP, SEXP SEEDSEXP, SEXP VERBOSEFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -39,8 +39,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type STEPSIZE(STEPSIZESEXP);
     Rcpp::traits::input_parameter< const double >::type NU(NUSEXP);
     Rcpp::traits::input_parameter< const int >::type METHODFLAG(METHODFLAGSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
     Rcpp::traits::input_parameter< const bool >::type VERBOSEFLAG(VERBOSEFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(isingGraph(DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, VERBOSEFLAG));
+    rcpp_result_gen = Rcpp::wrap(isingGraph(DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SEED, VERBOSEFLAG));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -108,7 +109,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stIsing_ncl", (DL_FUNC) &_stIsing_ncl, 4},
-    {"_stIsing_isingGraph", (DL_FUNC) &_stIsing_isingGraph, 9},
+    {"_stIsing_isingGraph", (DL_FUNC) &_stIsing_isingGraph, 10},
     {"_stIsing_rmultinom_wrapper", (DL_FUNC) &_stIsing_rmultinom_wrapper, 4},
     {"_stIsing_sampleH", (DL_FUNC) &_stIsing_sampleH, 5},
     {"_stIsing_sampleJ", (DL_FUNC) &_stIsing_sampleJ, 4},

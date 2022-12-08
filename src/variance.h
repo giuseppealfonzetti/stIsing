@@ -102,6 +102,7 @@ Rcpp::List sampleVar(
     // Identify dimensions
     const unsigned int d = THETA.size();
     const unsigned int n = DATA.rows();
+    const unsigned int kk= DATA.cols();
 
     // Initialise variance matrices and std errors vectors
     Eigen::MatrixXd tot, jmat, sandwich, cond;
@@ -170,6 +171,33 @@ Rcpp::List sampleVar(
         }else{
             var = Rcpp::List::create(Rcpp::Named("var_stoc") = inv_hmat/st_scale);
             se  = Rcpp::List::create(Rcpp::Named("se_stoc") = (inv_hmat/st_scale).diagonal().array().sqrt());
+        }
+    }
+
+    if(METHOD == 3){
+        double st_scale = NU*RANGE;
+        jmat = sampleJ(THETA, DATA, CONSTRAINTS, PRINTFLAG);
+        double alpha_1 = static_cast<double>(n-1)/static_cast<double>(n) + static_cast<double>(n-1)/static_cast<double>(n*kk-1);
+        double alpha_2 = -static_cast<double>(n-1)/static_cast<double>(n*kk-1);
+
+        if(TOTFLAG) {
+
+            jmat = sampleJ(THETA, DATA, CONSTRAINTS, PRINTFLAG);
+            sandwich = inv_hmat*jmat*inv_hmat;
+            var = Rcpp::List::create(
+                Rcpp::Named("var_stoc") = (alpha_1*inv_hmat + alpha_2*sandwich)/st_scale,
+                Rcpp::Named("var_stat") = sandwich/static_cast<double>(n),
+                Rcpp::Named("var_tot")  = (sandwich/static_cast<double>(n))+((alpha_1*inv_hmat + alpha_2*sandwich)/st_scale)
+            );
+
+            se = Rcpp::List::create(
+                Rcpp::Named("se_stoc") = ((alpha_1*inv_hmat + alpha_2*sandwich)/st_scale).diagonal().array().sqrt(),
+                Rcpp::Named("se_stat") = (sandwich/static_cast<double>(n)).diagonal().array().sqrt(),
+                Rcpp::Named("se_tot")  = ((sandwich/static_cast<double>(n))+((alpha_1*inv_hmat + alpha_2*sandwich)/st_scale)).diagonal().array().sqrt()
+            );
+        }else{
+            var = Rcpp::List::create(Rcpp::Named("var_stoc") = (alpha_1*inv_hmat + alpha_2*sandwich)/st_scale);
+            se  = Rcpp::List::create(Rcpp::Named("se_stoc") = ((alpha_1*inv_hmat + alpha_2*sandwich)/st_scale).diagonal().array().sqrt());
         }
     }
 

@@ -4,6 +4,7 @@
 #include <RcppEigen.h>
 #include <RcppClock.h>
 #include <math.h>
+#include <random>
 #include "utils.h"
 #include "variance.h"
 #include "binarynodeClass.h"
@@ -59,6 +60,7 @@ Rcpp::List isingGraph(
         const double STEPSIZE,
         const double NU,
         const int METHODFLAG,
+        const unsigned int SEED = 123,
         const bool VERBOSEFLAG = false
 
 ){
@@ -85,6 +87,9 @@ Rcpp::List isingGraph(
     case 2:
         scale = 1/static_cast<double>(NU);
         break;
+    case 3:
+        scale = 1/static_cast<double>(NU);
+        break;
     }
     // Rcpp::Rcout << " Final scale = " << scale<< "\n";
 
@@ -93,6 +98,13 @@ Rcpp::List isingGraph(
     Eigen::MatrixXd path_av_theta = Eigen::MatrixXd::Zero(MAXT + 1, d); path_av_theta.row(0) = THETA_INIT;
     Eigen::MatrixXd path_grad     = Eigen::MatrixXd::Zero(MAXT,     d);
     // Eigen::VectorXd path_ncl      = Eigen::VectorXd::Zero(MAXT);
+
+    // Initialize vector of indexes for entries in pairs_table
+    // Set-up the randomizer
+    std::vector<int> sublik_pool(n*p) ;
+    std::iota (std::begin(sublik_pool), std::end(sublik_pool), 0);
+    std::vector<int> vector_weights(n*p);
+
 
     ///////////////////////
     /* OPTIMISATION LOOP */
@@ -128,6 +140,19 @@ Rcpp::List isingGraph(
                     if(R::runif(0,1) < prob ) sampling_weights(i, k) = 1;
                 }
             }
+            break;
+        case 3:
+            std::mt19937 randomizer(SEED+t);
+            std::fill(vector_weights.begin(), vector_weights.end(), 0) ;
+            std::shuffle(sublik_pool.begin(), sublik_pool.end(), randomizer);
+            for(unsigned int draw = 0; draw < int(NU*kk); draw ++){
+                vector_weights[sublik_pool[draw]] = 1;
+                // int row = sublik_pool[draw] / kk;
+                // int col = sublik_pool[draw] % kk;
+                // sampling_weights(row, col) = 1;
+            }
+
+            std::copy(vector_weights.begin(), vector_weights.end(), sampling_weights.begin());
             break;
         }
         clock.tock("sampling_step");
@@ -189,6 +214,22 @@ Rcpp::List isingGraph(
     clock.tock("main");
     clock.stop("clock");
 
+
+
+
+
+    // Rcpp::NumericMatrix sampling_weights(n,kk);
+    // std::fill(sampling_weights.begin(), sampling_weights.end(), 0) ;
+    // std::fill(vector_weights.begin(), vector_weights.end(), 0) ;
+    // std::shuffle(sublik_pool.begin(), sublik_pool.end(), randomizer);
+    // for(unsigned int draw = 0; draw < p; draw ++){
+    //     vector_weights[sublik_pool[draw]] = 1;
+    // }
+    // std::copy(vector_weights.begin(), vector_weights.end(), sampling_weights.begin());
+
+
+    // Rcpp::Rcout << "5/3 =(" << 5/3 << "," << 5%3<< ")\n" ;
+
     Rcpp::List output = Rcpp::List::create(
         Rcpp::Named("path_theta") = path_theta,
         Rcpp::Named("path_av_theta") = path_av_theta,
@@ -197,6 +238,10 @@ Rcpp::List isingGraph(
         Rcpp::Named("scale") = scale,
         Rcpp::Named("n") = n,
         // Rcpp::Named("weights") = weights,
+        // Rcpp::Named("sublik_pool") = sublik_pool,
+        // Rcpp::Named("sampling_weights") = sampling_weights,
+
+
         Rcpp::Named("methodflag") = METHODFLAG
     );
 
