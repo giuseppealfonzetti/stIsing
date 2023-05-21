@@ -6,8 +6,8 @@
 //' @export
 // [[Rcpp::export]]
 Eigen::MatrixXd sampleH(
-        Eigen::Map<Eigen::VectorXd> THETA,
-        Eigen::Map<Eigen::MatrixXd> DATA,
+        Eigen::VectorXd THETA,
+        Eigen::MatrixXd DATA,
         std::vector<bool> &CONSTRAINTS,
         const bool INVERTFLAG = false,
         const bool VERBOSEFLAG = false
@@ -49,8 +49,8 @@ Eigen::MatrixXd sampleH(
 //' @export
 // [[Rcpp::export]]
 Eigen::MatrixXd sampleJ(
-        Eigen::Map<Eigen::VectorXd> THETA,
-        Eigen::Map<Eigen::MatrixXd> DATA,
+        Eigen::VectorXd THETA,
+        Eigen::MatrixXd DATA,
         std::vector<bool> &CONSTRAINTS,
         const bool VERBOSEFLAG = false
 ){
@@ -89,8 +89,8 @@ Eigen::MatrixXd sampleJ(
 //' @export
 // [[Rcpp::export]]
 Rcpp::List sampleVar(
-        Eigen::Map<Eigen::VectorXd> THETA,
-        Eigen::Map<Eigen::MatrixXd> DATA,
+        Eigen::VectorXd THETA,
+        Eigen::MatrixXd DATA,
         std::vector<bool> &CONSTRAINTS,
         const unsigned int NU,
         const unsigned int METHOD,

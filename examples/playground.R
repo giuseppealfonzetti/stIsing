@@ -1,4 +1,5 @@
 library(tidyverse)
+library(RcppClock)
 ##### functions #####
 ising_graph_lik <- function(par){
     ncl(as.matrix(data), par, Q, VERBOSEFLAG = F)$nll
@@ -9,7 +10,7 @@ ising_graph_gradient <- function(par){
 ##### setup parameters ######
 p <- 10
 d <- p + p*(p-1)/2
-n <- 4000
+n <- 2000
 
 parNodes <- rep(c(-1,1), p/2)
 parEdgesMat <- matrix(0,p, p)
@@ -195,3 +196,139 @@ fit_hyper$clock
 # mat <- matrix(rep(c(1,2,3), 5), 5,3, byrow = T)
 # purrr::transpose(.l = mat)
 # as.list(data.frame(t(mat)))
+
+#### simulation test ####
+theta_init <- rep(0, length(true_theta))
+scls <- diag(sampleH(true_theta, DATA = as.matrix(data), CONSTRAINTS = Q, INVERTFLAG = T))
+# scls <- 1/diag(sampleH(true_theta, DATA = as.matrix(data), CONSTRAINTS = Q, INVERTFLAG = F))
+# scls <- rep(1,d)
+
+fit_uc <- fit_isingGraph(
+    DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
+    METHOD = 'ucminf',
+    CPP_CONTROL = list(),
+    #UCMINF_CONTROL = list(),
+    INIT = theta_init,
+    ITERATIONS_SUBSET = NULL,
+    VERBOSEFLAG = 0
+)
+
+library(tidyverse)
+sim_settings <- expand_grid(
+    mod = c('OSGD', 'CSGD_bernoulli'),
+    stepsize = c(.01, 1, 10, 20),
+    stoc_seed = 1:5,
+    maxiter = 4000,
+    burn = 500
+)
+
+custom_est_fun <- function(MOD, STEPSIZE, SEED, MAXT, BURN){
+    ctrl <- list(
+        MAXT = MAXT,
+        BURN = BURN,
+        STEPSIZE = STEPSIZE,
+        PAR1 = 1,
+        PAR2 = STEPSIZE,
+        PAR3 = 3/4,#.501,
+        SCALEVEC = scls,
+        NU = 1,
+        SEED = SEED,
+        STEPSIZEFLAG = 1
+    )
+    mod_obj <- fit_isingGraph(
+        DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
+        METHOD = MOD,
+        CPP_CONTROL = ctrl,
+        INIT = theta_init,
+        ITERATIONS_SUBSET = seq(0, 4000, 100),
+        VERBOSEFLAG = 0
+    )
+
+    return(mod_obj)
+}
+
+
+est_tab <- sim_settings %>%
+    mutate(
+        mod_obj = purrr::pmap(
+            list(mod, stepsize, stoc_seed, maxiter, burn),
+            function(mod_, stepsize_, stoc_seed_, maxiter_, burn_){
+                custom_est_fun(
+                    MOD = mod_,
+                    STEPSIZE = stepsize_,
+                    SEED = stoc_seed_,
+                    MAXT = maxiter_,
+                    BURN = burn_)
+            }
+        )
+    )
+
+test_mod <- est_tab %>% pluck('mod_obj', 1)
+test_mod$fit$path_av_theta %>% dim()
+test_mod$fit$path_grad %>% dim()
+#get_tidy_path(test_mod, 'path_grad')
+get_tidy_path(test_mod, 'path_av_theta')
+
+metrics_tab <- est_tab %>%
+    mutate(
+        path_av_theta = map(mod_obj, ~get_tidy_path(.x, 'path_av_theta')),
+        #path_nll = map(mod_obj, ~get_tidy_path(.x, 'path_nll')),
+        #path_grad = map(mod_obj, ~get_tidy_path(.x, 'path_grad'))
+    ) %>%
+    select(-mod_obj) %>%
+    unnest('path_av_theta') %>%
+    mutate(
+        mse = map_dbl(path_av_theta, ~mean((.x-true_theta)^2)),
+        #grad_norm = map_dbl(path_grad, ~norm(as.matrix(.x)))
+    ) %>%
+    gather(key = 'performance', value = 'val', mse)
+
+
+gg <- metrics_tab %>%
+    ggplot( aes(x = iter, y = val, col = factor(stepsize), group = interaction(mod, stepsize, stoc_seed)))+
+    geom_line(aes(linetype = mod))+
+    #geom_hline(yintercept = log(mean((Opt_u$theta-repar_theta)^2)), linetype = 'dashed')+
+    facet_wrap(vars(performance), scales = 'free')+
+    theme_bw()+
+    scale_color_viridis_d()
+plotly::ggplotly(gg, dynamicTicks = T)
+
+true_tib <- tibble(par = 1:length(true_theta), true_val = true_theta)
+num_tib <- tibble(par = 1:length(true_theta), num_val = fit_uc$theta)
+
+av_par_tab <- est_tab %>%
+    mutate(
+        path_av_theta = map(mod_obj, ~get_tidy_path(.x, 'path_av_theta'))
+    ) %>%
+    unnest(c(path_av_theta)) %>%
+    mutate(
+        path_av_theta = lapply(path_av_theta, function(x){
+            tib <- tibble(
+                par = 1:length(x),
+                val = x
+            )
+            tib
+        })
+    ) %>%
+    unnest(c(path_av_theta)) %>%
+    select(mod, stepsize, iter, par, val) %>%
+    group_by(mod, stepsize, iter, par) %>%
+    summarise(av_val = mean(val)) %>%
+    mutate(
+        par = as.factor(par)
+    )
+
+gg1 <- av_par_tab  %>%
+    filter(iter %in% seq(0, 5000, 100)) %>%
+    #mutate(av_val = map2_dbl(av_val, par_type, ~if_else(.y == 'correlation', rofz_cpp(.x), .x))) %>%
+    ggplot(aes(x = iter, y = av_val))+
+    geom_line(aes(linetype = mod,  col = factor(stepsize), group = interaction(mod, stepsize, par))) +
+    geom_point(data = num_tib
+               , aes(x = 4020, y = num_val, group = par), col = 'red', shape = 4, size = 2)+
+    geom_point(data = true_tib, aes(x = 4040, y = true_val, group = par), col = 'blue', shape = 4, size = 2)+
+    facet_wrap(vars(stepsize), scales = 'free') +
+    theme_bw()+
+    scale_color_viridis_d()
+plotly::ggplotly(gg1, dynamicTicks = T)
+
+gg1

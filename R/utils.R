@@ -1,13 +1,14 @@
 #'@export
-check_SCSD_args <- function(ARGS, N){
+check_SCSD_args <- function(ARGS, N, D){
 
     out <- ARGS
 
-    if(is.null(ARGS$MAXT)) out$MAXT <- round(N^1.5,0)
+    if(is.null(ARGS$MAXT)) out$MAXT <- round(N,0)
     if(is.null(ARGS$BURN)) out$BURN <- 0
-    if(is.null(ARGS$STEPSIZE)) out$STEPSIZE <- 1e-3
+    if(is.null(ARGS$STEPSIZE)) out$STEPSIZE <- 1
     if(is.null(ARGS$NU)) out$NU <- 1
     if(is.null(ARGS$SEED)) out$SEED <- 123
+    if(is.null(ARGS$SCALEVEC)) out$SCALEVEC <- rep(1, D)
 
     return(out)
 }
@@ -28,10 +29,24 @@ get_tidy_path <- function(MOD_OBJ, PATH_LAB){
     iters <- MOD_OBJ$iterations_subset
     path  <- MOD_OBJ$fit[[PATH_LAB]]
 
-    out <- dplyr::tibble(iter = iters) %>%
-        dplyr::mutate(
-            path_chosen = split(t(path), rep(1:nrow(path), each = ncol(path)))
-        )
+    if(PATH_LAB%in%c('path_nll')){
+        out <- dplyr::tibble(iter = iters) %>%
+            dplyr::mutate(
+                path_chosen = c(path,NA)
+            )
+    }else if(PATH_LAB%in%c('path_grad')){
+        out <- dplyr::tibble(iter = iters) %>%
+            dplyr::mutate(
+                path_chosen = split(t(rbind(path, rep(NA, ncol(path)))), rep(1:(nrow(path)+1), each = ncol(path)))
+            )
+
+    }else{
+        out <- dplyr::tibble(iter = iters) %>%
+            dplyr::mutate(
+                path_chosen = split(t(path), rep(1:nrow(path), each = ncol(path)))
+            )
+    }
+
 
     colnames(out) <- c('iter', PATH_LAB)
 

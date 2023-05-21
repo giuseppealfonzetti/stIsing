@@ -60,9 +60,13 @@ Rcpp::List isingGraph(
         const double STEPSIZE,
         const double NU,
         const int METHODFLAG,
+        Eigen::VectorXd SCALEVEC,
         const unsigned int SEED = 123,
-        const bool VERBOSEFLAG = false
-
+        const bool VERBOSEFLAG = false,
+        const double PAR1 = 1,
+        const double PAR2 = 1,
+        const double PAR3 = .75,
+        const int STEPSIZEFLAG = 1
 ){
     // Set up clock monitor to export to R session trough RcppClock
     Rcpp::Clock clock;
@@ -97,7 +101,7 @@ Rcpp::List isingGraph(
     Eigen::MatrixXd path_theta    = Eigen::MatrixXd::Zero(MAXT + 1, d); path_theta.row(0)    = THETA_INIT;
     Eigen::MatrixXd path_av_theta = Eigen::MatrixXd::Zero(MAXT + 1, d); path_av_theta.row(0) = THETA_INIT;
     Eigen::MatrixXd path_grad     = Eigen::MatrixXd::Zero(MAXT,     d);
-    // Eigen::VectorXd path_ncl      = Eigen::VectorXd::Zero(MAXT);
+    std::vector<double> path_nll;
 
     // Initialize vector of indexes for entries in pairs_table
     // Set-up the randomizer
@@ -176,7 +180,7 @@ Rcpp::List isingGraph(
 
                     Node.setup_(data_i, theta_t, CONSTRAINTS, p, node);
                     ngradient_t -= weight * Node.gradient_();
-                    // ncl -= Node.ll_();
+                    ncl -= Node.ll_();
 
                 }
             }
@@ -191,8 +195,16 @@ Rcpp::List isingGraph(
         /*    PARAMETERS UPDATE  */
         ///////////////////////////
         clock.tick("update");
-        double stepsize_t = STEPSIZE * pow(t, -.501);
-        theta_t -= stepsize_t * ngradient_t;
+        double stepsize_t = STEPSIZE;
+        switch(STEPSIZEFLAG){
+            case 0:
+                stepsize_t *= pow(t, -PAR3);
+                break;
+            case 1:
+                stepsize_t *= PAR1 * pow(1 + PAR2*STEPSIZE*t, -PAR3);
+                break;
+        }
+        theta_t -= Eigen::VectorXd(stepsize_t * SCALEVEC.array() * ngradient_t.array());
         clock.tock("update");
 
 
@@ -201,7 +213,7 @@ Rcpp::List isingGraph(
         /////////////////////////////////
         path_theta.row(t ) = theta_t;
         path_grad.row(t-1) = ngradient_t;
-        // path_ncl(t-1)      = ncl;
+        path_nll.push_back(ncl);
 
         // averaging after burnsize
         if(t <= BURN){
@@ -217,24 +229,11 @@ Rcpp::List isingGraph(
 
 
 
-
-    // Rcpp::NumericMatrix sampling_weights(n,kk);
-    // std::fill(sampling_weights.begin(), sampling_weights.end(), 0) ;
-    // std::fill(vector_weights.begin(), vector_weights.end(), 0) ;
-    // std::shuffle(sublik_pool.begin(), sublik_pool.end(), randomizer);
-    // for(unsigned int draw = 0; draw < p; draw ++){
-    //     vector_weights[sublik_pool[draw]] = 1;
-    // }
-    // std::copy(vector_weights.begin(), vector_weights.end(), sampling_weights.begin());
-
-
-    // Rcpp::Rcout << "5/3 =(" << 5/3 << "," << 5%3<< ")\n" ;
-
     Rcpp::List output = Rcpp::List::create(
         Rcpp::Named("path_theta") = path_theta,
         Rcpp::Named("path_av_theta") = path_av_theta,
         Rcpp::Named("path_grad") = path_grad,
-        // Rcpp::Named("path_ncl") = path_ncl,
+        Rcpp::Named("path_nll") = path_nll,
         Rcpp::Named("scale") = scale,
         Rcpp::Named("n") = n,
         // Rcpp::Named("weights") = weights,

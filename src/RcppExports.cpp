@@ -26,8 +26,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // isingGraph
-Rcpp::List isingGraph(const Eigen::MatrixXd& DATA, const Eigen::VectorXd& THETA_INIT, const std::vector<bool>& CONSTRAINTS, const unsigned int MAXT, const unsigned int BURN, const double STEPSIZE, const double NU, const int METHODFLAG, const unsigned int SEED, const bool VERBOSEFLAG);
-RcppExport SEXP _stIsing_isingGraph(SEXP DATASEXP, SEXP THETA_INITSEXP, SEXP CONSTRAINTSSEXP, SEXP MAXTSEXP, SEXP BURNSEXP, SEXP STEPSIZESEXP, SEXP NUSEXP, SEXP METHODFLAGSEXP, SEXP SEEDSEXP, SEXP VERBOSEFLAGSEXP) {
+Rcpp::List isingGraph(const Eigen::MatrixXd& DATA, const Eigen::VectorXd& THETA_INIT, const std::vector<bool>& CONSTRAINTS, const unsigned int MAXT, const unsigned int BURN, const double STEPSIZE, const double NU, const int METHODFLAG, Eigen::VectorXd SCALEVEC, const unsigned int SEED, const bool VERBOSEFLAG, const double PAR1, const double PAR2, const double PAR3, const int STEPSIZEFLAG);
+RcppExport SEXP _stIsing_isingGraph(SEXP DATASEXP, SEXP THETA_INITSEXP, SEXP CONSTRAINTSSEXP, SEXP MAXTSEXP, SEXP BURNSEXP, SEXP STEPSIZESEXP, SEXP NUSEXP, SEXP METHODFLAGSEXP, SEXP SCALEVECSEXP, SEXP SEEDSEXP, SEXP VERBOSEFLAGSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP STEPSIZEFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -39,9 +39,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type STEPSIZE(STEPSIZESEXP);
     Rcpp::traits::input_parameter< const double >::type NU(NUSEXP);
     Rcpp::traits::input_parameter< const int >::type METHODFLAG(METHODFLAGSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type SCALEVEC(SCALEVECSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
     Rcpp::traits::input_parameter< const bool >::type VERBOSEFLAG(VERBOSEFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(isingGraph(DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SEED, VERBOSEFLAG));
+    Rcpp::traits::input_parameter< const double >::type PAR1(PAR1SEXP);
+    Rcpp::traits::input_parameter< const double >::type PAR2(PAR2SEXP);
+    Rcpp::traits::input_parameter< const double >::type PAR3(PAR3SEXP);
+    Rcpp::traits::input_parameter< const int >::type STEPSIZEFLAG(STEPSIZEFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(isingGraph(DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SCALEVEC, SEED, VERBOSEFLAG, PAR1, PAR2, PAR3, STEPSIZEFLAG));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -60,13 +65,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // sampleH
-Eigen::MatrixXd sampleH(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> DATA, std::vector<bool>& CONSTRAINTS, const bool INVERTFLAG, const bool VERBOSEFLAG);
+Eigen::MatrixXd sampleH(Eigen::VectorXd THETA, Eigen::MatrixXd DATA, std::vector<bool>& CONSTRAINTS, const bool INVERTFLAG, const bool VERBOSEFLAG);
 RcppExport SEXP _stIsing_sampleH(SEXP THETASEXP, SEXP DATASEXP, SEXP CONSTRAINTSSEXP, SEXP INVERTFLAGSEXP, SEXP VERBOSEFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type DATA(DATASEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type DATA(DATASEXP);
     Rcpp::traits::input_parameter< std::vector<bool>& >::type CONSTRAINTS(CONSTRAINTSSEXP);
     Rcpp::traits::input_parameter< const bool >::type INVERTFLAG(INVERTFLAGSEXP);
     Rcpp::traits::input_parameter< const bool >::type VERBOSEFLAG(VERBOSEFLAGSEXP);
@@ -75,13 +80,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // sampleJ
-Eigen::MatrixXd sampleJ(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> DATA, std::vector<bool>& CONSTRAINTS, const bool VERBOSEFLAG);
+Eigen::MatrixXd sampleJ(Eigen::VectorXd THETA, Eigen::MatrixXd DATA, std::vector<bool>& CONSTRAINTS, const bool VERBOSEFLAG);
 RcppExport SEXP _stIsing_sampleJ(SEXP THETASEXP, SEXP DATASEXP, SEXP CONSTRAINTSSEXP, SEXP VERBOSEFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type DATA(DATASEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type DATA(DATASEXP);
     Rcpp::traits::input_parameter< std::vector<bool>& >::type CONSTRAINTS(CONSTRAINTSSEXP);
     Rcpp::traits::input_parameter< const bool >::type VERBOSEFLAG(VERBOSEFLAGSEXP);
     rcpp_result_gen = Rcpp::wrap(sampleJ(THETA, DATA, CONSTRAINTS, VERBOSEFLAG));
@@ -89,13 +94,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // sampleVar
-Rcpp::List sampleVar(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> DATA, std::vector<bool>& CONSTRAINTS, const unsigned int NU, const unsigned int METHOD, const unsigned int RANGE, const bool TOTFLAG, const bool PRINTFLAG);
+Rcpp::List sampleVar(Eigen::VectorXd THETA, Eigen::MatrixXd DATA, std::vector<bool>& CONSTRAINTS, const unsigned int NU, const unsigned int METHOD, const unsigned int RANGE, const bool TOTFLAG, const bool PRINTFLAG);
 RcppExport SEXP _stIsing_sampleVar(SEXP THETASEXP, SEXP DATASEXP, SEXP CONSTRAINTSSEXP, SEXP NUSEXP, SEXP METHODSEXP, SEXP RANGESEXP, SEXP TOTFLAGSEXP, SEXP PRINTFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type DATA(DATASEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type DATA(DATASEXP);
     Rcpp::traits::input_parameter< std::vector<bool>& >::type CONSTRAINTS(CONSTRAINTSSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type NU(NUSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type METHOD(METHODSEXP);
@@ -109,7 +114,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stIsing_ncl", (DL_FUNC) &_stIsing_ncl, 4},
-    {"_stIsing_isingGraph", (DL_FUNC) &_stIsing_isingGraph, 10},
+    {"_stIsing_isingGraph", (DL_FUNC) &_stIsing_isingGraph, 15},
     {"_stIsing_rmultinom_wrapper", (DL_FUNC) &_stIsing_rmultinom_wrapper, 4},
     {"_stIsing_sampleH", (DL_FUNC) &_stIsing_sampleH, 5},
     {"_stIsing_sampleJ", (DL_FUNC) &_stIsing_sampleJ, 4},
