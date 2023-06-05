@@ -11,9 +11,39 @@ isingGraph <- function(DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, 
     .Call(`_stIsing_isingGraph`, DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SCALEVEC, SEED, VERBOSEFLAG, PAR1, PAR2, PAR3, STEPSIZEFLAG)
 }
 
+#' @export
+isingGraph2 <- function(DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SCALEVEC, SEED = 123L, VERBOSEFLAG = FALSE, PAR1 = 1, PAR2 = 1, PAR3 = .75, SAMPLING_WINDOW = 1L, STEPSIZEFLAG = 1L) {
+    .Call(`_stIsing_isingGraph2`, DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SCALEVEC, SEED, VERBOSEFLAG, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG)
+}
+
 #'@export
 rmultinom_wrapper <- function(prob, classes, batch, K) {
     .Call(`_stIsing_rmultinom_wrapper`, prob, classes, batch, K)
+}
+
+#'@export
+hyper_sampling <- function(K, N, SEED) {
+    .Call(`_stIsing_hyper_sampling`, K, N, SEED)
+}
+
+#'@export
+unit_sampling <- function(N, SEED) {
+    .Call(`_stIsing_unit_sampling`, N, SEED)
+}
+
+#'@export
+components_given_unit <- function(UNIT, K) {
+    .Call(`_stIsing_components_given_unit`, UNIT, K)
+}
+
+#'@export
+bernoulli_sampling <- function(K, N, PROB) {
+    .Call(`_stIsing_bernoulli_sampling`, K, N, PROB)
+}
+
+#'@export
+index_to_component <- function(P, N, INDEX) {
+    .Call(`_stIsing_index_to_component`, P, N, INDEX)
 }
 
 #' @export

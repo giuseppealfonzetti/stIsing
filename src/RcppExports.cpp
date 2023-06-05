@@ -50,6 +50,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// isingGraph2
+Rcpp::List isingGraph2(const Eigen::MatrixXd& DATA, const Eigen::VectorXd& THETA_INIT, const std::vector<bool>& CONSTRAINTS, const unsigned int MAXT, const unsigned int BURN, const double STEPSIZE, const double NU, const int METHODFLAG, Eigen::VectorXd SCALEVEC, const unsigned int SEED, const bool VERBOSEFLAG, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const int STEPSIZEFLAG);
+RcppExport SEXP _stIsing_isingGraph2(SEXP DATASEXP, SEXP THETA_INITSEXP, SEXP CONSTRAINTSSEXP, SEXP MAXTSEXP, SEXP BURNSEXP, SEXP STEPSIZESEXP, SEXP NUSEXP, SEXP METHODFLAGSEXP, SEXP SCALEVECSEXP, SEXP SEEDSEXP, SEXP VERBOSEFLAGSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP STEPSIZEFLAGSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type DATA(DATASEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA_INIT(THETA_INITSEXP);
+    Rcpp::traits::input_parameter< const std::vector<bool>& >::type CONSTRAINTS(CONSTRAINTSSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type MAXT(MAXTSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type BURN(BURNSEXP);
+    Rcpp::traits::input_parameter< const double >::type STEPSIZE(STEPSIZESEXP);
+    Rcpp::traits::input_parameter< const double >::type NU(NUSEXP);
+    Rcpp::traits::input_parameter< const int >::type METHODFLAG(METHODFLAGSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type SCALEVEC(SCALEVECSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
+    Rcpp::traits::input_parameter< const bool >::type VERBOSEFLAG(VERBOSEFLAGSEXP);
+    Rcpp::traits::input_parameter< const double >::type PAR1(PAR1SEXP);
+    Rcpp::traits::input_parameter< const double >::type PAR2(PAR2SEXP);
+    Rcpp::traits::input_parameter< const double >::type PAR3(PAR3SEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SAMPLING_WINDOW(SAMPLING_WINDOWSEXP);
+    Rcpp::traits::input_parameter< const int >::type STEPSIZEFLAG(STEPSIZEFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(isingGraph2(DATA, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SCALEVEC, SEED, VERBOSEFLAG, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rmultinom_wrapper
 Rcpp::NumericMatrix rmultinom_wrapper(const double prob, const unsigned int classes, const unsigned int batch, const unsigned int K);
 RcppExport SEXP _stIsing_rmultinom_wrapper(SEXP probSEXP, SEXP classesSEXP, SEXP batchSEXP, SEXP KSEXP) {
@@ -61,6 +87,69 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const unsigned int >::type batch(batchSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type K(KSEXP);
     rcpp_result_gen = Rcpp::wrap(rmultinom_wrapper(prob, classes, batch, K));
+    return rcpp_result_gen;
+END_RCPP
+}
+// hyper_sampling
+std::vector<int> hyper_sampling(const unsigned int K, const unsigned int N, const unsigned int SEED);
+RcppExport SEXP _stIsing_hyper_sampling(SEXP KSEXP, SEXP NSEXP, SEXP SEEDSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
+    rcpp_result_gen = Rcpp::wrap(hyper_sampling(K, N, SEED));
+    return rcpp_result_gen;
+END_RCPP
+}
+// unit_sampling
+std::vector<int> unit_sampling(const unsigned int N, const unsigned int SEED);
+RcppExport SEXP _stIsing_unit_sampling(SEXP NSEXP, SEXP SEEDSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
+    rcpp_result_gen = Rcpp::wrap(unit_sampling(N, SEED));
+    return rcpp_result_gen;
+END_RCPP
+}
+// components_given_unit
+std::vector<int> components_given_unit(const unsigned int UNIT, const unsigned int K);
+RcppExport SEXP _stIsing_components_given_unit(SEXP UNITSEXP, SEXP KSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned int >::type UNIT(UNITSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type K(KSEXP);
+    rcpp_result_gen = Rcpp::wrap(components_given_unit(UNIT, K));
+    return rcpp_result_gen;
+END_RCPP
+}
+// bernoulli_sampling
+std::vector<int> bernoulli_sampling(const unsigned int K, const unsigned int N, const double PROB);
+RcppExport SEXP _stIsing_bernoulli_sampling(SEXP KSEXP, SEXP NSEXP, SEXP PROBSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const double >::type PROB(PROBSEXP);
+    rcpp_result_gen = Rcpp::wrap(bernoulli_sampling(K, N, PROB));
+    return rcpp_result_gen;
+END_RCPP
+}
+// index_to_component
+std::vector<int> index_to_component(const unsigned int P, const unsigned int N, const unsigned int INDEX);
+RcppExport SEXP _stIsing_index_to_component(SEXP PSEXP, SEXP NSEXP, SEXP INDEXSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned int >::type P(PSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type INDEX(INDEXSEXP);
+    rcpp_result_gen = Rcpp::wrap(index_to_component(P, N, INDEX));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -115,7 +204,13 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_stIsing_ncl", (DL_FUNC) &_stIsing_ncl, 4},
     {"_stIsing_isingGraph", (DL_FUNC) &_stIsing_isingGraph, 15},
+    {"_stIsing_isingGraph2", (DL_FUNC) &_stIsing_isingGraph2, 16},
     {"_stIsing_rmultinom_wrapper", (DL_FUNC) &_stIsing_rmultinom_wrapper, 4},
+    {"_stIsing_hyper_sampling", (DL_FUNC) &_stIsing_hyper_sampling, 3},
+    {"_stIsing_unit_sampling", (DL_FUNC) &_stIsing_unit_sampling, 2},
+    {"_stIsing_components_given_unit", (DL_FUNC) &_stIsing_components_given_unit, 2},
+    {"_stIsing_bernoulli_sampling", (DL_FUNC) &_stIsing_bernoulli_sampling, 3},
+    {"_stIsing_index_to_component", (DL_FUNC) &_stIsing_index_to_component, 3},
     {"_stIsing_sampleH", (DL_FUNC) &_stIsing_sampleH, 5},
     {"_stIsing_sampleJ", (DL_FUNC) &_stIsing_sampleJ, 4},
     {"_stIsing_sampleVar", (DL_FUNC) &_stIsing_sampleVar, 8},
