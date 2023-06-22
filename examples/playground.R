@@ -413,6 +413,12 @@ fit_sgd3$theta
 
 fit_sgd3$fit$path_theta
 fit_sgd3$fit$path_av_theta
+as_tibble(fit_sgd3$fit$path_grad)
+
+fit_sgd3$fit$iter_idx %>% length()
+get_tidy_path(fit_sgd3, 'path_av_theta')
+get_tidy_path3(fit_sgd3, 'path_av_theta')
+get_tidy_path3(fit_sgd3, 'path_grad')
 
 fit_sgd3$control$STEPSIZE
 fit_sgd$theta

@@ -71,6 +71,36 @@ get_tidy_path <- function(MOD_OBJ, PATH_LAB){
 }
 
 #'@export
+get_tidy_path3 <- function(MOD_OBJ, PATH_LAB){
+    iters <- MOD_OBJ$fit$iter_idx
+    path  <- MOD_OBJ$fit[[PATH_LAB]]
+
+    if(PATH_LAB%in%c('path_nll')){
+        out <- dplyr::tibble(iter = iters) %>%
+            dplyr::mutate(
+                path_chosen = c(path,NA)
+            )
+    }else if(PATH_LAB%in%c('path_grad')){
+        iters <- iters[-1]
+        out <- dplyr::tibble(iter = iters) %>%
+            dplyr::mutate(
+                path_chosen = split(t(path), rep(1:nrow(path), each = ncol(path)))
+            )
+
+    }else{
+        out <- dplyr::tibble(iter = iters) %>%
+            dplyr::mutate(
+                path_chosen = split(t(path), rep(1:nrow(path), each = ncol(path)))
+            )
+    }
+
+
+    colnames(out) <- c('iter', PATH_LAB)
+
+    return(out)
+}
+
+#'@export
 ising_from_theta_to_emat <- function(par, p){
     emat <- matrix(0, p, p)
     counter <- p+1

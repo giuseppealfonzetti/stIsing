@@ -552,7 +552,7 @@ Rcpp::List isingGraph3(
     std::vector<Eigen::VectorXd> path_grad;
 
     std::vector<double> path_nll;
-    std::vector<double> iter_idx;
+    std::vector<double> iter_idx; iter_idx.push_back(0);
     int last_stored_iter = 0;
 
     // Initialize vector of indexes for entries in pairs_table
@@ -692,7 +692,7 @@ Rcpp::List isingGraph3(
         /////////////////////////////////
         /* STORE ITERATION QUANTITIES  */
         /////////////////////////////////
-        if((t-last_stored_iter)==EACH){
+        if(t == 1 | (t-last_stored_iter) == EACH){
             iter_idx.push_back(t);
             path_theta.push_back(theta_t);
             path_grad.push_back(ngradient_t);
@@ -716,7 +716,7 @@ Rcpp::List isingGraph3(
         // Rcpp::Named("path_nll") = path_nll,
         Rcpp::Named("scale") = scale,
         Rcpp::Named("n") = n,
-        // Rcpp::Named("weights") = weights,
+        Rcpp::Named("iter_idx") = iter_idx,
         // Rcpp::Named("sublik_pool") = sublik_pool,
         // Rcpp::Named("sampling_weights") = sampling_weights,
 
