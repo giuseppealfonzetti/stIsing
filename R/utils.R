@@ -14,6 +14,23 @@ check_SCSD_args <- function(ARGS, N, D){
 }
 
 #'@export
+check_stoc_args <- function(ARGS, N, D){
+
+    out <- ARGS
+
+    if(is.null(ARGS$MAXT)) out$MAXT <- N
+    if(is.null(ARGS$BURN)) out$BURN <- N*.25
+    if(is.null(ARGS$STEPSIZE)) out$STEPSIZE <- 1
+    if(is.null(ARGS$NU)) out$NU <- 1
+    if(is.null(ARGS$SEED)) out$SEED <- 123
+    if(is.null(ARGS$SCALEVEC)) out$SCALEVEC <- rep(1, D)
+    if(is.null(ARGS$EACH)) out$EACH <- 1
+    if(is.null(ARGS$HOLDOUTFLAG)) out$HOLDOUTFLAG <- F
+
+    return(out)
+}
+
+#'@export
 check_GD_args <- function(ARGS, N){
 
     out <- list('MAXT' = ARGS$MAXT, 'STEPSIZE' = ARGS$STEPSIZE)

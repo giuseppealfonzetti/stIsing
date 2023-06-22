@@ -10,9 +10,9 @@ ising_graph_gradient <- function(par){
 ##### setup parameters ######
 p <- 10
 d <- p + p*(p-1)/2
-n <- 2000
+n <- 10000
 
-parNodes <- rep(c(-1,1), p/2)
+parNodes <- rep(c(-.5,.5), p/2)
 parEdgesMat <- matrix(0,p, p)
 counter <- 1
 for (col in 1:(p-1)) {
@@ -101,13 +101,13 @@ fit_uc <- fit_isingGraph(
 )
 
 cpp_ctrl <- list(
-    MAXT = 1000,
+    MAXT = n*2,
     BURN = 500,
     STEPSIZE = 1.5,
     NU = 1,
     SEED = 1
 )
-fit_sgd2 <- fit_isingGraph2(
+fit_sgd <- fit_isingGraph(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
     METHOD = 'OSGD',
     CPP_CONTROL = cpp_ctrl,
@@ -358,13 +358,26 @@ bernoulli_sampling(K = 10, N = 5, PROB = 1/5)
 components_given_unit(0, 10)
 
 theta_init <- rep(0, length(true_theta))
+subtraj <- seq(0, n*5, 1000)
+fit_uc <- fit_isingGraph2(
+    DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
+    METHOD = 'ucminf',
+    CPP_CONTROL = list(),
+    #UCMINF_CONTROL = list(),
+    INIT = theta_init,
+    ITERATIONS_SUBSET = NULL,
+    VERBOSEFLAG = 0
+)
+mean((fit_uc$theta-true_theta)^2)
+
 cpp_ctrl <- list(
-    MAXT = 1000,
+    MAXT = n*5,
     BURN = 1,
-    STEPSIZE = 1.5,
+    STEPSIZE = 1,
     NU = 1,
     SEED = 1,
-    SAMPLING_WINDOW = 100
+    STEPSIZEFLAG = 0,
+    SAMPLING_WINDOW = 100#n*.25
 )
 fit_sgd <- fit_isingGraph2(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
@@ -372,7 +385,7 @@ fit_sgd <- fit_isingGraph2(
     CPP_CONTROL = cpp_ctrl,
     #UCMINF_CONTROL = list(),
     INIT = theta_init,
-    ITERATIONS_SUBSET = NULL,
+    ITERATIONS_SUBSET = subtraj,
     VERBOSEFLAG = 0
 )
 fit_sgd2 <- fit_isingGraph2(
@@ -381,25 +394,47 @@ fit_sgd2 <- fit_isingGraph2(
     CPP_CONTROL = cpp_ctrl,
     #UCMINF_CONTROL = list(),
     INIT = theta_init,
-    ITERATIONS_SUBSET = NULL,
+    ITERATIONS_SUBSET = subtraj,
     VERBOSEFLAG = 0
 )
+cpp_ctrl$EACH <- 1000
+
+fit_sgd3 <- fit_isingGraph3(
+    DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
+    METHOD = 'recycle_standard',
+    CPP_CONTROL = cpp_ctrl,
+    #UCMINF_CONTROL = list(),
+    INIT = theta_init,
+
+    VERBOSEFLAG = 0
+)
+fit_sgd3$clock
+fit_sgd3$theta
+
+fit_sgd3$fit$path_theta
+fit_sgd3$fit$path_av_theta
+
+fit_sgd3$control$STEPSIZE
 fit_sgd$theta
 fit_sgd2$theta
+fit_sgd3$theta
+mean((fit_sgd$theta-true_theta)^2)
+mean((fit_sgd2$theta-true_theta)^2)
+mean((fit_sgd3$theta-true_theta)^2)
 
 fit_sgd$clock
 fit_sgd2$clock
 
-fit_sgd$fit$path_grad
-fit_sgd2$fit$path_grad
+
 
 cpp_ctrl <- list(
-    MAXT = 1000,
+    MAXT = n*5,
     BURN = 1,
-    STEPSIZE = 1.5,
+    STEPSIZE = 1,
     NU = 1,
     SEED = 1,
-    SAMPLING_WINDOW = 100
+    STEPSIZEFLAG = 0,
+    SAMPLING_WINDOW = 100#n*.25
 )
 fit_hyper <- fit_isingGraph2(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
@@ -407,7 +442,7 @@ fit_hyper <- fit_isingGraph2(
     CPP_CONTROL = cpp_ctrl,
     #UCMINF_CONTROL = list(),
     INIT = theta_init,
-    ITERATIONS_SUBSET = NULL,
+    ITERATIONS_SUBSET = subtraj,
     VERBOSEFLAG = 0
 )
 fit_hyper2 <- fit_isingGraph2(
@@ -416,11 +451,24 @@ fit_hyper2 <- fit_isingGraph2(
     CPP_CONTROL = cpp_ctrl,
     #UCMINF_CONTROL = list(),
     INIT = theta_init,
-    ITERATIONS_SUBSET = NULL,
+    ITERATIONS_SUBSET = subtraj,
     VERBOSEFLAG = 0
 )
 fit_hyper$theta
 fit_hyper2$theta
-
+mean((fit_hyper$theta-true_theta)^2)
+mean((fit_hyper2$theta-true_theta)^2)
 fit_hyper$clock
 fit_hyper2$clock
+
+fit_be <- fit_isingGraph2(
+    DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
+    METHOD = 'bernoulli',
+    CPP_CONTROL = cpp_ctrl,
+    #UCMINF_CONTROL = list(),
+    INIT = theta_init,
+    ITERATIONS_SUBSET = NULL,
+    VERBOSEFLAG = 0
+)
+mean((fit_be$theta-true_theta)^2)
+fit_be$clock

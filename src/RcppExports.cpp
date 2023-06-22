@@ -76,6 +76,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// isingGraph3
+Rcpp::List isingGraph3(const Eigen::MatrixXd& DATA, const Eigen::MatrixXd& HOLDOUT, const Eigen::VectorXd& THETA_INIT, const std::vector<bool>& CONSTRAINTS, const unsigned int MAXT, const unsigned int BURN, const double STEPSIZE, const double NU, const int METHODFLAG, Eigen::VectorXd SCALEVEC, const unsigned int SEED, const bool VERBOSEFLAG, const bool HOLDOUTFLAG, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int EACH, const unsigned int EACHCLOCK, const int STEPSIZEFLAG);
+RcppExport SEXP _stIsing_isingGraph3(SEXP DATASEXP, SEXP HOLDOUTSEXP, SEXP THETA_INITSEXP, SEXP CONSTRAINTSSEXP, SEXP MAXTSEXP, SEXP BURNSEXP, SEXP STEPSIZESEXP, SEXP NUSEXP, SEXP METHODFLAGSEXP, SEXP SCALEVECSEXP, SEXP SEEDSEXP, SEXP VERBOSEFLAGSEXP, SEXP HOLDOUTFLAGSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP EACHSEXP, SEXP EACHCLOCKSEXP, SEXP STEPSIZEFLAGSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type DATA(DATASEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type HOLDOUT(HOLDOUTSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA_INIT(THETA_INITSEXP);
+    Rcpp::traits::input_parameter< const std::vector<bool>& >::type CONSTRAINTS(CONSTRAINTSSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type MAXT(MAXTSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type BURN(BURNSEXP);
+    Rcpp::traits::input_parameter< const double >::type STEPSIZE(STEPSIZESEXP);
+    Rcpp::traits::input_parameter< const double >::type NU(NUSEXP);
+    Rcpp::traits::input_parameter< const int >::type METHODFLAG(METHODFLAGSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type SCALEVEC(SCALEVECSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
+    Rcpp::traits::input_parameter< const bool >::type VERBOSEFLAG(VERBOSEFLAGSEXP);
+    Rcpp::traits::input_parameter< const bool >::type HOLDOUTFLAG(HOLDOUTFLAGSEXP);
+    Rcpp::traits::input_parameter< const double >::type PAR1(PAR1SEXP);
+    Rcpp::traits::input_parameter< const double >::type PAR2(PAR2SEXP);
+    Rcpp::traits::input_parameter< const double >::type PAR3(PAR3SEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SAMPLING_WINDOW(SAMPLING_WINDOWSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type EACH(EACHSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type EACHCLOCK(EACHCLOCKSEXP);
+    Rcpp::traits::input_parameter< const int >::type STEPSIZEFLAG(STEPSIZEFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(isingGraph3(DATA, HOLDOUT, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SCALEVEC, SEED, VERBOSEFLAG, HOLDOUTFLAG, PAR1, PAR2, PAR3, SAMPLING_WINDOW, EACH, EACHCLOCK, STEPSIZEFLAG));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rmultinom_wrapper
 Rcpp::NumericMatrix rmultinom_wrapper(const double prob, const unsigned int classes, const unsigned int batch, const unsigned int K);
 RcppExport SEXP _stIsing_rmultinom_wrapper(SEXP probSEXP, SEXP classesSEXP, SEXP batchSEXP, SEXP KSEXP) {
@@ -205,6 +235,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stIsing_ncl", (DL_FUNC) &_stIsing_ncl, 4},
     {"_stIsing_isingGraph", (DL_FUNC) &_stIsing_isingGraph, 15},
     {"_stIsing_isingGraph2", (DL_FUNC) &_stIsing_isingGraph2, 16},
+    {"_stIsing_isingGraph3", (DL_FUNC) &_stIsing_isingGraph3, 20},
     {"_stIsing_rmultinom_wrapper", (DL_FUNC) &_stIsing_rmultinom_wrapper, 4},
     {"_stIsing_hyper_sampling", (DL_FUNC) &_stIsing_hyper_sampling, 3},
     {"_stIsing_unit_sampling", (DL_FUNC) &_stIsing_unit_sampling, 2},
