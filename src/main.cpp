@@ -573,6 +573,7 @@ Rcpp::List isingGraph3(
     Eigen::VectorXd av_theta_prev = THETA_INIT;
 
     unsigned int sampling_window_iterator = 0;
+    unsigned int last_iter = MAXT;
     for(unsigned int t = 1; t <= MAXT; t++){
         // check user interruption
         Rcpp::checkUserInterrupt();
@@ -692,7 +693,8 @@ Rcpp::List isingGraph3(
         /////////////////////////////////
         /* STORE ITERATION QUANTITIES  */
         /////////////////////////////////
-        if(t == 1 | (t-last_stored_iter) == EACH){
+
+        if(t == 1 | t == BURN | (t-last_stored_iter) == EACH | t == last_iter){
             iter_idx.push_back(t);
             path_theta.push_back(theta_t);
             path_grad.push_back(ngradient_t);

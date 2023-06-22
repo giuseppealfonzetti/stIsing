@@ -334,7 +334,7 @@ fit_isingGraph3 <- function(
         message(paste0('2. Optimising with ', METHOD, '...'))
 
         # Check stochastic control parameters
-        cpp_ctrl <- check_SCSD_args(CPP_CONTROL, N = n, D = d)
+        cpp_ctrl <- check_stoc_args(CPP_CONTROL, N = n, D = d)
 
         # # Check iterations selected
         # if(!is.null(ITERATIONS_SUBSET)){
@@ -354,7 +354,6 @@ fit_isingGraph3 <- function(
 
         if(METHOD == 'standard'){args$METHODFLAG <- 1} else if(METHOD == 'bernoulli'){args$METHODFLAG <- 2}else if(METHOD == 'hyper'){args$METHODFLAG <- 3}else if(METHOD == 'recycle_standard'){args$METHODFLAG <- 4}else if(METHOD == 'recycle_hyper'){args$METHODFLAG <- 5}
         #args$METHODFLAG <- dplyr::if_else(METHOD == 'OSGD', 1, 2)
-
 
         fit <- do.call(isingGraph3, args)
 
