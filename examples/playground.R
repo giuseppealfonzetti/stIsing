@@ -494,7 +494,7 @@ cpp_ctrl <- list(
 idx <- sample(1:n, .9*n)
 tn <- stepsize_tuning3(
     DATA_LIST = list(DATA = as.matrix(data[idx,]), CONSTRAINTS = Q, HOLDOUT = as.matrix(data[setdiff(1:n,idx),])),
-    METHOD = 'recycle_standard',
+    METHOD = 'recycle_hyper',
     CPP_CONTROL = cpp_ctrl,
     STEPSIZE_GRID = c(.1, .25, .5, 1, 2, 4),
     INIT = theta_init,
@@ -521,8 +521,26 @@ fit_hyper3$fit$iter_idx
 
 
 
-
-
+cpp_ctrl <- list(
+    MAXT = .5*n,
+    BURN = .25*n,
+    STEPSIZE = 1,
+    NU = 1,
+    SEED = 1,
+    STEPSIZEFLAG = 0,
+    SAMPLING_WINDOW = 10,#n*.25
+    EACH = 100
+)
+idx <- sample(1:n, .9*n)
+tn <- stepsize_tuning4(
+    DATA_LIST = list(DATA = as.matrix(data[idx,]), CONSTRAINTS = Q, HOLDOUT = as.matrix(data[setdiff(1:n,idx),])),
+    METHOD = 'recycle_hyper',
+    CPP_CONTROL = cpp_ctrl,
+    STEPSIZE_INIT= 10,
+    INIT = theta_init,
+    VERBOSEFLAG = 0
+)
+tn
 
 
 

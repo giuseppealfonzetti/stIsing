@@ -506,7 +506,7 @@ Rcpp::List isingGraph3(
         const unsigned int SAMPLING_WINDOW = 1,
         const unsigned int EACH = 1,
         const unsigned int EACHCLOCK = 100,
-        const int STEPSIZEFLAG = 1
+        const int STEPSIZEFLAG = 0
 ){
     // Set up clock monitor to export to R session trough RcppClock
     Rcpp::Clock clock;
