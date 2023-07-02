@@ -163,6 +163,7 @@ stepsize_tuning4 <- function(
         METHOD,
         CPP_CONTROL = list(),
         STEPSIZE_INIT = NULL,
+        LENGTH = 0.5,
         INIT = NULL,
         VERBOSEFLAG = 0
 ){
@@ -220,16 +221,23 @@ stepsize_tuning4 <- function(
     nll <- Rwr_ncl(fit$path_av_theta[[length(fit$path_av_theta)]])
     tib <- tibble(stepsize = args$STEPSIZE, hnll = nll)
     res <- tib
+    new_args <- args
     while (cond) {
-        args$STEPSIZE <- args$STEPSIZE/2
-        cat(paste0('Using stepsize ', args$STEPSIZE, ':\n'))
+        new_args$STEPSIZE <- new_args$STEPSIZE*LENGTH
+        #cat(paste0('Using stepsize ', new_args$STEPSIZE, ':\n'))
 
-        fit <- do.call(isingGraph3, args)
-        new_nll <- Rwr_ncl(fit$path_av_theta[[length(fit$path_av_theta)]])
-        tib <- tibble(stepsize = args$STEPSIZE,  hnll = new_nll)
+        new_fit <- do.call(isingGraph3, new_args)
+        new_nll <- Rwr_ncl(new_fit$path_av_theta[[length(new_fit$path_av_theta)]])
+
+        #cat(paste0('\n', round(new_nll, 4), '\n'))
+
+        tib <- tibble(stepsize = new_args$STEPSIZE,  hnll = new_nll)
         res <- res %>% bind_rows(tib)
-        cond <- (new_nll < nll)
-        nll <- new_nll
+        if(!is.numeric(new_nll)){break}else{
+            cond <- (new_nll < nll)
+            nll <- new_nll
+        }
+
     }
 
 

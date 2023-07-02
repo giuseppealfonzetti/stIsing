@@ -8,7 +8,7 @@ ising_graph_gradient <- function(par){
     ncl(as.matrix(data), par, Q, VERBOSEFLAG = F)$ngradient
 }
 ##### setup parameters ######
-p <- 10
+p <- 20
 d <- p + p*(p-1)/2
 n <- 10000
 
@@ -482,25 +482,28 @@ fit_be$clock
 
 
 cpp_ctrl <- list(
-    MAXT = .25*n,
+    MAXT = 3*n,
     BURN = .25*n,
     STEPSIZE = 1,
     NU = 1,
     SEED = 1,
     STEPSIZEFLAG = 0,
-    SAMPLING_WINDOW = 10,#n*.25
+    SAMPLING_WINDOW = 500,#n*.25
     EACH = 100
 )
 idx <- sample(1:n, .9*n)
 tn <- stepsize_tuning3(
     DATA_LIST = list(DATA = as.matrix(data[idx,]), CONSTRAINTS = Q, HOLDOUT = as.matrix(data[setdiff(1:n,idx),])),
-    METHOD = 'recycle_hyper',
+    METHOD = 'recycle_standard',
     CPP_CONTROL = cpp_ctrl,
     STEPSIZE_GRID = c(.1, .25, .5, 1, 2, 4),
     INIT = theta_init,
     VERBOSEFLAG = 0
 )
 tn
+tn$best_step
+tn$grid %>%
+    filter(iter == cpp_ctrl$MAXT)
 gg_tn <- tn$grid %>%
     filter(iter<=cpp_ctrl$BURN) %>%
     ggplot(aes(x = iter/n, y = nll, group = stepsize, col = as.factor(stepsize))) +
@@ -510,7 +513,7 @@ gg_tn <- tn$grid %>%
 plotly::ggplotly(gg_tn, dynamicTicks = T)
 fit_hyper3 <- fit_isingGraph3(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
-    METHOD = 'recycle_hyper',
+    METHOD = 'recycle_standard',
     CPP_CONTROL = cpp_ctrl,
     #UCMINF_CONTROL = list(),
     INIT = theta_init,
@@ -522,29 +525,42 @@ fit_hyper3$fit$iter_idx
 
 
 cpp_ctrl <- list(
-    MAXT = .5*n,
+    MAXT = n,
     BURN = .25*n,
-    STEPSIZE = 1,
     NU = 1,
     SEED = 1,
     STEPSIZEFLAG = 0,
-    SAMPLING_WINDOW = 10,#n*.25
+    SAMPLING_WINDOW = 500,#n*.25
+    EACHCLOCK = 100,
     EACH = 100
 )
-idx <- sample(1:n, .9*n)
+set.seed(123); idx <- sample(1:n, .8*n)
+tictoc::tic()
 tn <- stepsize_tuning4(
     DATA_LIST = list(DATA = as.matrix(data[idx,]), CONSTRAINTS = Q, HOLDOUT = as.matrix(data[setdiff(1:n,idx),])),
     METHOD = 'recycle_hyper',
     CPP_CONTROL = cpp_ctrl,
-    STEPSIZE_INIT= 10,
+    STEPSIZE_INIT= 20,
+    LENGTH = 2/3,
     INIT = theta_init,
     VERBOSEFLAG = 0
 )
 tn
 
+cpp_ctrl$STEPSIZE <- tn$best_step
+cpp_ctrl$MAXT <- 3*n
 
-
-
+fit_hyper3 <- fit_isingGraph3(
+    DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
+    METHOD = 'recycle_hyper',
+    CPP_CONTROL = cpp_ctrl,
+    #UCMINF_CONTROL = list(),
+    INIT = theta_init,
+    VERBOSEFLAG = 0
+)
+tictoc::toc()
+log(mean((fit_uc$theta-true_theta)^2))
+log(mean((fit_hyper3$theta-true_theta)^2))
 
 
 
