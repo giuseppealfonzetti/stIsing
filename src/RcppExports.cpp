@@ -77,8 +77,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // isingGraph3
-Rcpp::List isingGraph3(const Eigen::MatrixXd& DATA, const Eigen::MatrixXd& HOLDOUT, const Eigen::VectorXd& THETA_INIT, const std::vector<bool>& CONSTRAINTS, const unsigned int MAXT, const unsigned int BURN, const double STEPSIZE, const double NU, const int METHODFLAG, Eigen::VectorXd SCALEVEC, const unsigned int SEED, const bool VERBOSEFLAG, const bool HOLDOUTFLAG, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int EACH, const unsigned int EACHCLOCK, const int STEPSIZEFLAG);
-RcppExport SEXP _stIsing_isingGraph3(SEXP DATASEXP, SEXP HOLDOUTSEXP, SEXP THETA_INITSEXP, SEXP CONSTRAINTSSEXP, SEXP MAXTSEXP, SEXP BURNSEXP, SEXP STEPSIZESEXP, SEXP NUSEXP, SEXP METHODFLAGSEXP, SEXP SCALEVECSEXP, SEXP SEEDSEXP, SEXP VERBOSEFLAGSEXP, SEXP HOLDOUTFLAGSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP EACHSEXP, SEXP EACHCLOCKSEXP, SEXP STEPSIZEFLAGSEXP) {
+Rcpp::List isingGraph3(const Eigen::MatrixXd& DATA, const Eigen::MatrixXd& HOLDOUT, const Eigen::VectorXd& THETA_INIT, const std::vector<bool>& CONSTRAINTS, const unsigned int MAXT, const unsigned int BURN, const double STEPSIZE, const double NU, const int METHODFLAG, Eigen::VectorXd SCALEVEC, const unsigned int SEED, const bool VERBOSEFLAG, const bool HOLDOUTFLAG, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int EACH, const unsigned int EACHCLOCK, const int STEPSIZEFLAG, const int T_INIT);
+RcppExport SEXP _stIsing_isingGraph3(SEXP DATASEXP, SEXP HOLDOUTSEXP, SEXP THETA_INITSEXP, SEXP CONSTRAINTSSEXP, SEXP MAXTSEXP, SEXP BURNSEXP, SEXP STEPSIZESEXP, SEXP NUSEXP, SEXP METHODFLAGSEXP, SEXP SCALEVECSEXP, SEXP SEEDSEXP, SEXP VERBOSEFLAGSEXP, SEXP HOLDOUTFLAGSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP EACHSEXP, SEXP EACHCLOCKSEXP, SEXP STEPSIZEFLAGSEXP, SEXP T_INITSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -102,7 +102,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const unsigned int >::type EACH(EACHSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type EACHCLOCK(EACHCLOCKSEXP);
     Rcpp::traits::input_parameter< const int >::type STEPSIZEFLAG(STEPSIZEFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(isingGraph3(DATA, HOLDOUT, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SCALEVEC, SEED, VERBOSEFLAG, HOLDOUTFLAG, PAR1, PAR2, PAR3, SAMPLING_WINDOW, EACH, EACHCLOCK, STEPSIZEFLAG));
+    Rcpp::traits::input_parameter< const int >::type T_INIT(T_INITSEXP);
+    rcpp_result_gen = Rcpp::wrap(isingGraph3(DATA, HOLDOUT, THETA_INIT, CONSTRAINTS, MAXT, BURN, STEPSIZE, NU, METHODFLAG, SCALEVEC, SEED, VERBOSEFLAG, HOLDOUTFLAG, PAR1, PAR2, PAR3, SAMPLING_WINDOW, EACH, EACHCLOCK, STEPSIZEFLAG, T_INIT));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -235,7 +236,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stIsing_ncl", (DL_FUNC) &_stIsing_ncl, 4},
     {"_stIsing_isingGraph", (DL_FUNC) &_stIsing_isingGraph, 15},
     {"_stIsing_isingGraph2", (DL_FUNC) &_stIsing_isingGraph2, 16},
-    {"_stIsing_isingGraph3", (DL_FUNC) &_stIsing_isingGraph3, 20},
+    {"_stIsing_isingGraph3", (DL_FUNC) &_stIsing_isingGraph3, 21},
     {"_stIsing_rmultinom_wrapper", (DL_FUNC) &_stIsing_rmultinom_wrapper, 4},
     {"_stIsing_hyper_sampling", (DL_FUNC) &_stIsing_hyper_sampling, 3},
     {"_stIsing_unit_sampling", (DL_FUNC) &_stIsing_unit_sampling, 2},

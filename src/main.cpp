@@ -506,7 +506,8 @@ Rcpp::List isingGraph3(
         const unsigned int SAMPLING_WINDOW = 1,
         const unsigned int EACH = 1,
         const unsigned int EACHCLOCK = 100,
-        const int STEPSIZEFLAG = 0
+        const int STEPSIZEFLAG = 0,
+        const int T_INIT = 1
 ){
     // Set up clock monitor to export to R session trough RcppClock
     Rcpp::Clock clock;
@@ -552,8 +553,8 @@ Rcpp::List isingGraph3(
     std::vector<Eigen::VectorXd> path_grad;
 
     std::vector<double> path_nll;
-    std::vector<double> iter_idx; iter_idx.push_back(0);
-    int last_stored_iter = 0;
+    std::vector<double> iter_idx; iter_idx.push_back(T_INIT-1);
+    int last_stored_iter = T_INIT-1;
 
     // Initialize vector of indexes for entries in pairs_table
     // Set-up the randomizer
@@ -574,7 +575,7 @@ Rcpp::List isingGraph3(
 
     unsigned int sampling_window_iterator = 0;
     unsigned int last_iter = MAXT;
-    for(unsigned int t = 1; t <= MAXT; t++){
+    for(unsigned int t = T_INIT; t <= MAXT; t++){
         // check user interruption
         Rcpp::checkUserInterrupt();
         Rcpp::Rcout << "\r Iter:" << t << " ";
