@@ -220,6 +220,8 @@ stepsize_tuning4 <- function(
     fit <- do.call(isingGraph3, args)
     nll <- Rwr_ncl(fit$path_av_theta[[length(fit$path_av_theta)]])
     tib <- tibble(stepsize = args$STEPSIZE, hnll = nll)
+    tib$theta <- list(fit$path_av_theta[[length(fit$path_av_theta)]])
+
     res <- tib
     new_args <- args
     while (cond) {
@@ -232,20 +234,24 @@ stepsize_tuning4 <- function(
         #cat(paste0('\n', round(new_nll, 4), '\n'))
 
         tib <- tibble(stepsize = new_args$STEPSIZE,  hnll = new_nll)
+        tib$theta <- list(new_fit$path_av_theta[[length(new_fit$path_av_theta)]])
         res <- res %>% bind_rows(tib)
         if(!is.numeric(new_nll)){break}else{
             cond <- (new_nll < nll)
             nll <- new_nll
         }
+        if(!is.logical(cond)){stop('likelihood differene undefined')}
+
 
     }
 
 
     best = res %>% filter(hnll == min(hnll))
 
-    return(list(grid = res,
-                best_step = best %>% pluck('stepsize', 1),
-                #best_theta = best %>% pluck('theta', 1),
-                best_nll = best %>% pluck('hnll', 1))
+    return(list(
+        best_theta = best %>% pluck('theta', 1),
+        grid = res,
+        best_step = best %>% pluck('stepsize', 1),
+        best_nll = best %>% pluck('hnll', 1))
     )
 }
