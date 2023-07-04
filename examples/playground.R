@@ -525,7 +525,7 @@ fit_hyper3$fit$iter_idx
 
 
 cpp_ctrl <- list(
-    MAXT = n,
+    MAXT = .25*n,
     BURN = .25*n,
     NU = 1,
     SEED = 1,
@@ -540,16 +540,17 @@ tn <- stepsize_tuning4(
     DATA_LIST = list(DATA = as.matrix(data[idx,]), CONSTRAINTS = Q, HOLDOUT = as.matrix(data[setdiff(1:n,idx),])),
     METHOD = 'recycle_hyper',
     CPP_CONTROL = cpp_ctrl,
-    STEPSIZE_INIT= 20,
-    LENGTH = 2/3,
+    STEPSIZE_INIT= 5,
+    LENGTH = .75,
     INIT = theta_init,
     VERBOSEFLAG = 0
 )
-tn
+tn$grid %>% pluck('hnll')
 
 cpp_ctrl$STEPSIZE <- tn$best_step
 cpp_ctrl$MAXT <- 3*n
-
+cpp_ctrl$T_INIT <- .5*n + 1
+cpp_ctrl$EACH <- .25*n
 fit_hyper3 <- fit_isingGraph3(
     DATA_LIST = list(DATA = as.matrix(data), CONSTRAINTS = Q),
     METHOD = 'recycle_hyper',
@@ -559,13 +560,14 @@ fit_hyper3 <- fit_isingGraph3(
     VERBOSEFLAG = 0
 )
 tictoc::toc()
+get_tidy_path3(fit_hyper3, 'path_av_theta')
 log(mean((fit_uc$theta-true_theta)^2))
 log(mean((fit_hyper3$theta-true_theta)^2))
 
+fit_hyper3$fit$iter_idx
 
 
-
-
+tn$best_path %>% pluck('path_av_theta', 27) - tn$best_theta
 
 
 

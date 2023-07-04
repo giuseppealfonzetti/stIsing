@@ -165,7 +165,8 @@ stepsize_tuning4 <- function(
         STEPSIZE_INIT = NULL,
         LENGTH = 0.5,
         INIT = NULL,
-        VERBOSEFLAG = 0
+        VERBOSEFLAG = 0,
+        MAXATTEMPT = 10
 ){
     out <- list()
     start_time <- Sys.time()
@@ -221,10 +222,11 @@ stepsize_tuning4 <- function(
     nll <- Rwr_ncl(fit$path_av_theta[[length(fit$path_av_theta)]])
     tib <- tibble(stepsize = args$STEPSIZE, hnll = nll)
     tib$theta <- list(fit$path_av_theta[[length(fit$path_av_theta)]])
+    tib$path_theta <- list(tibble(iter = fit$iter_idx, path_av_theta = fit$path_av_theta))
 
     res <- tib
     new_args <- args
-    while (cond) {
+    for (i in 1:MAXATTEMPT) {
         new_args$STEPSIZE <- new_args$STEPSIZE*LENGTH
         #cat(paste0('Using stepsize ', new_args$STEPSIZE, ':\n'))
 
@@ -235,15 +237,40 @@ stepsize_tuning4 <- function(
 
         tib <- tibble(stepsize = new_args$STEPSIZE,  hnll = new_nll)
         tib$theta <- list(new_fit$path_av_theta[[length(new_fit$path_av_theta)]])
+        tib$path_theta <- list(tibble(iter = new_fit$iter_idx, path_av_theta = new_fit$path_av_theta))
         res <- res %>% bind_rows(tib)
-        if(!is.numeric(new_nll)){break}else{
-            cond <- (new_nll < nll)
-            nll <- new_nll
-        }
-        if(!is.logical(cond)){stop('likelihood differene undefined')}
 
+        cond <- (new_nll < nll)
+        # if(!is.numeric(new_nll)){break}else{
+        #     cond <- (new_nll < nll)
+        #     nll <- new_nll
+        # }
+        if(!is.logical(cond)){stop('likelihood differene undefined')}
+        if(!cond) break;
+        nll <- new_nll
+        #path_theta <- tibble(iter = new_fit$iter_idx, path_av_theta = new_fit$path_av_theta)
 
     }
+    # while (cond) {
+    #     new_args$STEPSIZE <- new_args$STEPSIZE*LENGTH
+    #     #cat(paste0('Using stepsize ', new_args$STEPSIZE, ':\n'))
+    #
+    #     new_fit <- do.call(isingGraph3, new_args)
+    #     new_nll <- Rwr_ncl(new_fit$path_av_theta[[length(new_fit$path_av_theta)]])
+    #
+    #     #cat(paste0('\n', round(new_nll, 4), '\n'))
+    #
+    #     tib <- tibble(stepsize = new_args$STEPSIZE,  hnll = new_nll)
+    #     tib$theta <- list(new_fit$path_av_theta[[length(new_fit$path_av_theta)]])
+    #     res <- res %>% bind_rows(tib)
+    #     if(!is.numeric(new_nll)){break}else{
+    #         cond <- (new_nll < nll)
+    #         nll <- new_nll
+    #     }
+    #     if(!is.logical(cond)){stop('likelihood differene undefined')}
+    #
+    #
+    # }
 
 
     best = res %>% filter(hnll == min(hnll))
@@ -252,6 +279,8 @@ stepsize_tuning4 <- function(
         best_theta = best %>% pluck('theta', 1),
         grid = res,
         best_step = best %>% pluck('stepsize', 1),
-        best_nll = best %>% pluck('hnll', 1))
+        best_nll = best %>% pluck('hnll', 1),
+        best_path = best %>% pluck('path_theta', 1)
+        )
     )
 }
